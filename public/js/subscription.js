@@ -2,7 +2,7 @@
  * LabDesk - Subscription & Payment Handler (Razorpay)
  */
 
-const RAZORPAY_KEY_ID = 'rzp_live_S70CcphcnuUe0T';
+const RAZORPAY_KEY_ID = 'rzp_test_S707OAHFQYtN6O'; // TEST KEY - Replace with live key in production
 
 const SUBSCRIPTION_PLANS = {
     weekly: {

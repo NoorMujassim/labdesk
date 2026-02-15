@@ -1,0 +1,85 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function: Check if user is authenticated
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    // Helper function: Get user ID
+    function getUserId() {
+      return request.auth.uid;
+    }
+    
+    // Helper function: Check if user is admin
+    function isAdmin() {
+      return isSignedIn() && (
+        // Method 1: Check admin collection
+        exists(/databases/$(database)/documents/admin/config) &&
+        get(/databases/$(database)/documents/admin/config).data.adminUid == getUserId()
+      ) || (
+        // Method 2: Check user's isAdmin field
+        exists(/databases/$(database)/documents/users/$(getUserId())) &&
+        get(/databases/$(database)/documents/users/$(getUserId())).data.isAdmin == true
+      );
+    }
+    
+    // Helper function: Check if user's email is verified
+    function isEmailVerified() {
+      return request.auth.token.email_verified == true;
+    }
+    
+    // ==================== ADMIN COLLECTION ====================
+    match /admin/{document=**} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+    
+    // ==================== USERS COLLECTION ====================
+    // Each user has their own document and subcollections
+    match /users/{userId} {
+      // User can read and write their own document
+      // ADMIN CAN READ ALL USERS AND WRITE TO ALL USERS (CRITICAL!)
+      allow read: if isSignedIn() && (getUserId() == userId || isAdmin());
+      allow write: if isSignedIn() && (getUserId() == userId || isAdmin());
+      
+      // User's patients subcollection
+      // ADMIN CAN ACCESS ALL PATIENTS
+      match /patients/{patientId} {
+        allow read, write: if isSignedIn() && (getUserId() == userId || isAdmin());
+      }
+      
+      // User's reports subcollection
+      // ADMIN CAN ACCESS ALL REPORTS
+      match /reports/{reportId} {
+        allow read, write: if isSignedIn() && (getUserId() == userId || isAdmin());
+      }
+      
+      // User's subscriptions subcollection
+      // ADMIN CAN MANAGE ALL SUBSCRIPTIONS
+      match /subscriptions/{subscriptionId} {
+        allow read: if isSignedIn() && (getUserId() == userId || isAdmin());
+        allow write: if isSignedIn() && (getUserId() == userId || isAdmin());
+      }
+    }
+    
+    // ==================== PENDING USERS (FOR APPROVAL SYSTEM) ====================
+    match /pendingUsers/{userId} {
+      // Users can create their own pending request
+      allow create: if isSignedIn() && getUserId() == userId;
+      // Users can read their own pending status
+      allow read: if isSignedIn() && (getUserId() == userId || isAdmin());
+      // Only admin can update/delete pending requests
+      allow update, delete: if isAdmin();
+    }
+    
+    // ==================== APPROVED USERS ====================
+    match /approvedUsers/{userId} {
+      // Anyone authenticated can read (for checking approval status)
+      allow read: if isSignedIn();
+      // Only admin can write
+      allow write: if isAdmin();
+    }
+  }
+}

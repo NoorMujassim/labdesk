@@ -38,20 +38,33 @@ auth.onAuthStateChanged(async (user) => {
         console.log('User signed in:', user.email, 'UID:', user.uid);
         await DB.setUser(user.uid);
 
-        // Check verification first
-        if (!user.emailVerified) {
-            document.getElementById('authScreen').classList.remove('hidden');
-            document.getElementById('app').classList.add('hidden');
-            renderVerifyEmail(user);
-            return;
-        } else {
-            // Auto-register verified user in Admin Panel
+        // Check admin status first
+        isAdmin = await DB.checkIfAdmin();
+        console.log('Is Admin:', isAdmin);
+
+        // Auto-register verified users
+        if (user.emailVerified) {
             DB.registerVerifiedUser(user).catch(console.error);
         }
 
-        // Check admin status
-        isAdmin = await DB.checkIfAdmin();
-        console.log('Is Admin:', isAdmin);
+        // CRITICAL: 48-hour email verification check (except for admin)
+        if (!isAdmin && !user.emailVerified) {
+            // Get user's creation time from Firebase Auth
+            const creationTime = new Date(user.metadata.creationTime);
+            const now = new Date();
+            const hoursSinceCreation = (now - creationTime) / (1000 * 60 * 60);
+
+            console.log('Account age (hours):', hoursSinceCreation.toFixed(2));
+
+            // If account is older than 48 hours and email not verified, BLOCK ACCESS
+            if (hoursSinceCreation > 48) {
+                console.log('⛔ Email verification required - 48 hours exceeded');
+                document.getElementById('authScreen').classList.remove('hidden');
+                document.getElementById('app').classList.add('hidden');
+                renderVerifyEmail(user);
+                return; // BLOCK access until verification
+            }
+        }
 
         if (isAdmin) {
             document.getElementById('authScreen').classList.add('hidden');
@@ -72,6 +85,19 @@ auth.onAuthStateChanged(async (user) => {
                 renderUserInfo(user);
                 await updateLabNameHeader();
                 showPage('dashboard');
+
+                // Show email verification reminder if not verified (within 48 hours)
+                if (!user.emailVerified) {
+                    const creationTime = new Date(user.metadata.creationTime);
+                    const now = new Date();
+                    const hoursRemaining = 48 - ((now - creationTime) / (1000 * 60 * 60));
+
+                    setTimeout(() => {
+                        if (hoursRemaining > 0) {
+                            showToast(`📧 Please verify your email within ${Math.floor(hoursRemaining)} hours or access will be blocked!`, 'warning');
+                        }
+                    }, 2000);
+                }
             } else {
                 // Trial Expired & No Subscription -> Force Subscription Page
                 document.getElementById('authScreen').classList.add('hidden');

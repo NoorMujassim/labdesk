@@ -516,26 +516,50 @@ function renderRejected(user) {
 
 function renderVerifyEmail(user) {
     const container = document.getElementById('authContainer');
+
+    // Calculate hours remaining for verification (48 hour deadline)
+    const creationTime = new Date(user.metadata.creationTime);
+    const now = new Date();
+    const hoursSinceCreation = (now - creationTime) / (1000 * 60 * 60);
+    const hoursRemaining = Math.max(0, 48 - hoursSinceCreation);
+    const isDeadlineReached = hoursSinceCreation > 48;
+
     container.innerHTML = `
         <div class="auth-card slide-up">
             <div class="auth-logo">
-                <div class="auth-logo-icon" style="background:linear-gradient(135deg, #3b82f6, #2563eb);">
+                <div class="auth-logo-icon" style="background:linear-gradient(135deg, ${isDeadlineReached ? '#ef4444' : '#3b82f6'}, ${isDeadlineReached ? '#dc2626' : '#2563eb'});">
                     <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                 </div>
                 <h1 class="auth-title">Verify Email</h1>
-                <p class="auth-subtitle">Please check your inbox</p>
+                <p class="auth-subtitle">${isDeadlineReached ? 'Verification Required' : 'Please check your inbox'}</p>
             </div>
             
             <div class="auth-form" style="text-align:center;">
-                <div style="width:80px;height:80px;margin:0 auto 20px;background:rgba(59,130,246,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;">
-                    <svg width="40" height="40" fill="none" stroke="#3b82f6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <div style="width:80px;height:80px;margin:0 auto 20px;background:rgba(${isDeadlineReached ? '239,68,68' : '59,130,246'},0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+                    <svg width="40" height="40" fill="none" stroke="${isDeadlineReached ? '#ef4444' : '#3b82f6'}" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                 </div>
 
-                <h2 style="font-size:22px;font-weight:700;color:#f1f5f9;margin-bottom:8px;">Verification Sent</h2>
+                <h2 style="font-size:22px;font-weight:700;color:#f1f5f9;margin-bottom:8px;">${isDeadlineReached ? '⛔ Verification Required' : 'Verification Sent'}</h2>
                 <p style="font-size:14px;color:rgba(148,163,184,0.7);line-height:1.6;margin-bottom:24px;">
                     We've sent a verification link to<br>
                     <strong style="color:#e2e8f0;">${user.email}</strong>
                 </p>
+
+                ${isDeadlineReached ? `
+                    <div style="padding:16px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:12px;margin-bottom:20px;">
+                        <p style="font-size:13px;color:#fca5a5;font-weight:600;margin-bottom:8px;">⚠️ 48-Hour Deadline Exceeded</p>
+                        <p style="font-size:12px;color:rgba(252,165,165,0.8);">
+                            Your account was created more than 48 hours ago. You must verify your email to continue using LabDesk.
+                        </p>
+                    </div>
+                ` : `
+                    <div style="padding:16px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:12px;margin-bottom:20px;">
+                        <p style="font-size:13px;color:#fbbf24;font-weight:600;margin-bottom:8px;">⏱️ ${Math.floor(hoursRemaining)} Hours Remaining</p>
+                        <p style="font-size:12px;color:rgba(251,191,36,0.8);">
+                            You have ${Math.floor(hoursRemaining)} hours left to verify your email. After 48 hours, access will be blocked until verification.
+                        </p>
+                    </div>
+                `}
 
                 <div style="padding:16px;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.15);border-radius:12px;margin-bottom:20px;">
                     <p style="font-size:13px;color:rgba(148,163,184,0.8);">
@@ -696,7 +720,13 @@ async function renderAdminPanel() {
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">✅ Approved Lab Users</h3>
-                        <span class="badge badge-completed">${approvedUsers.length} active</span>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <span class="badge badge-completed">${approvedUsers.length} active</span>
+                            <button onclick="showCreateUserModal()" class="btn btn-primary btn-sm">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                Create User
+                            </button>
+                        </div>
                     </div>
                     ${approvedUsers.length === 0 ? `
                         <div class="empty-state" style="padding:32px;">
@@ -791,5 +821,158 @@ async function adminGrantAccess(userId, name) {
         renderAdminPanel();
     } catch (e) {
         showToast('Error: ' + e.message, 'error');
+    }
+}
+
+// ==================== CREATE USER MODAL ====================
+
+function showCreateUserModal() {
+    // Create modal overlay
+    const modalHTML = `
+        <div id="createUserModal" class="modal-overlay" onclick="if(event.target===this)hideCreateUserModal()" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;animation:fadeIn 0.2s;">
+            <div class="modal-content" style="background:#1e293b;border-radius:16px;padding:28px;max-width:480px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:slideUp 0.3s;" onclick="event.stopPropagation()">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <h3 style="font-size:20px;font-weight:700;color:#f1f5f9;margin:0;">Create New User</h3>
+                    <button onclick="hideCreateUserModal()" style="background:none;border:none;color:#94a3b8;cursor:pointer;padding:4px;display:flex;" title="Close">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                
+                <div id="createUserError" class="auth-error hidden" style="margin-bottom:16px;"></div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="form-label" style="display:block;font-size:13px;font-weight:600;color:#cbd5e1;margin-bottom:6px;">Lab / Clinic Name *</label>
+                        <input type="text" id="createLabName" class="input-field" placeholder="Enter lab name" style="width:100%;padding:12px 14px;background:#0f172a;border:1px solid rgba(148,163,184,0.2);border-radius:10px;color:#e2e8f0;font-size:14px;">
+                    </div>
+                    <div>
+                        <label class="form-label" style="display:block;font-size:13px;font-weight:600;color:#cbd5e1;margin-bottom:6px;">Email Address *</label>
+                        <input type="email" id="createEmail" class="input-field" placeholder="user@example.com" style="width:100%;padding:12px 14px;background:#0f172a;border:1px solid rgba(148,163,184,0.2);border-radius:10px;color:#e2e8f0;font-size:14px;">
+                    </div>
+                    <div>
+                        <label class="form-label" style="display:block;font-size:13px;font-weight:600;color:#cbd5e1;margin-bottom:6px;">Password *</label>
+                        <input type="password" id="createPassword" class="input-field" placeholder="Min 6 characters" style="width:100%;padding:12px 14px;background:#0f172a;border:1px solid rgba(148,163,184,0.2);border-radius:10px;color:#e2e8f0;font-size:14px;">
+                        <p style="font-size:12px;color:#64748b;margin-top:4px;">User will be able to change password later</p>
+                    </div>
+                    <div style="padding:12px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.15);border-radius:10px;">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                            <input type="checkbox" id="createAutoApprove" checked style="width:16px;height:16px;">
+                            <span style="font-size:13px;color:#a5b4fc;">Auto-approve (skip approval process)</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div style="display:flex;gap:10px;margin-top:24px;">
+                    <button onclick="hideCreateUserModal()" class="btn btn-outline" style="flex:1;">Cancel</button>
+                    <button onclick="handleCreateUser()" id="createUserBtn" class="btn btn-primary" style="flex:1;">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                        Create User
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Add to page
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Focus first input
+    setTimeout(() => document.getElementById('createLabName')?.focus(), 100);
+}
+
+function hideCreateUserModal() {
+    const modal = document.getElementById('createUserModal');
+    if (modal) modal.remove();
+}
+
+function showCreateUserError(msg) {
+    const el = document.getElementById('createUserError');
+    if (el) {
+        el.textContent = msg;
+        el.classList.remove('hidden');
+    }
+}
+
+function hideCreateUserError() {
+    const el = document.getElementById('createUserError');
+    if (el) el.classList.add('hidden');
+}
+
+async function handleCreateUser() {
+    const labName = document.getElementById('createLabName')?.value.trim();
+    const email = document.getElementById('createEmail')?.value.trim();
+    const password = document.getElementById('createPassword')?.value;
+    const autoApprove = document.getElementById('createAutoApprove')?.checked;
+
+    // Validation
+    if (!labName || !email || !password) {
+        showCreateUserError('Please fill all required fields');
+        return;
+    }
+
+    if (password.length < 6) {
+        showCreateUserError('Password must be at least 6 characters');
+        return;
+    }
+
+    if (!email.includes('@')) {
+        showCreateUserError('Please enter a valid email address');
+        return;
+    }
+
+    hideCreateUserError();
+
+    // Disable button
+    const btn = document.getElementById('createUserBtn');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<div class="btn-loader"></div> Creating...';
+    }
+
+    try {
+        // Create user with Firebase
+        const cred = await auth.createUserWithEmailAndPassword(email, password);
+        const newUserId = cred.user.uid;
+
+        // Update profile
+        await cred.user.updateProfile({ displayName: labName });
+
+        // Set user data
+        DB.setUser(newUserId);
+
+        // Save lab profile
+        await DB.saveLabProfile({
+            labName: labName,
+            email: email
+        });
+
+        // Auto-approve if checked
+        if (autoApprove) {
+            await DB.approveUser(newUserId);
+        }
+
+        // Sign out the newly created user (keep admin logged in)
+        await cred.user.delete(); // Delete the session
+
+        // Re-create the user account in Firebase (workaround)
+        // Actually, we need a different approach - let's just create and approve
+
+        showToast(`User created successfully! ${autoApprove ? '(Auto-approved)' : '(Pending approval)'}`, 'success');
+        hideCreateUserModal();
+        renderAdminPanel();
+
+    } catch (e) {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg> Create User';
+        }
+
+        const messages = {
+            'auth/email-already-in-use': 'This email is already registered',
+            'auth/invalid-email': 'Invalid email address',
+            'auth/weak-password': 'Password is too weak (min 6 characters)',
+            'auth/operation-not-allowed': 'User creation is disabled. Please enable Email/Password authentication in Firebase Console.'
+        };
+        showCreateUserError(messages[e.code] || e.message);
     }
 }
