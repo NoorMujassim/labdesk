@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<users>
+    <!-- Replace YOUR_BING_VERIFICATION_CODE with the code from Bing Webmaster Tools -->
+    <!-- Go to: https://www.bing.com/webmasters → Add Site → Get XML verification -->
+    <user>YOUR_BING_VERIFICATION_CODE</user>
+</users>

@@ -1,0 +1,30 @@
+# LabDesk - Robots.txt
+# https://labdesk-18c70.web.app
+
+User-agent: *
+Allow: /
+Allow: /landing.html
+Allow: /index.html
+Allow: /sitemap.xml
+
+# Block internal app routes from crawling
+Disallow: /js/
+Disallow: /css/
+
+# Sitemap location
+Sitemap: https://labdesk-18c70.web.app/sitemap.xml
+
+# Google specific
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+# Bing specific
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 2
+
+# Yandex
+User-agent: Yandex
+Allow: /
+Crawl-delay: 3

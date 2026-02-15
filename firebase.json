@@ -1,0 +1,55 @@
+{
+    "hosting": {
+        "public": "public",
+        "ignore": [
+            "firebase.json",
+            "**/.*",
+            "**/node_modules/**",
+            "README.md"
+        ],
+        "rewrites": [
+            {
+                "source": "**",
+                "destination": "/index.html"
+            }
+        ],
+        "headers": [
+            {
+                "source": "**/*.css",
+                "headers": [
+                    {
+                        "key": "Cache-Control",
+                        "value": "max-age=31536000"
+                    }
+                ]
+            },
+            {
+                "source": "**/*.js",
+                "headers": [
+                    {
+                        "key": "Cache-Control",
+                        "value": "max-age=31536000"
+                    }
+                ]
+            },
+            {
+                "source": "sitemap.xml",
+                "headers": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/xml"
+                    }
+                ]
+            },
+            {
+                "source": "robots.txt",
+                "headers": [
+                    {
+                        "key": "Content-Type",
+                        "value": "text/plain"
+                    }
+                ]
+            }
+        ]
+    }
+}
