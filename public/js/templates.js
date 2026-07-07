@@ -1,7 +1,47 @@
-/**
- * LabDesk - Test Templates Database
+﻿/**
+ * CUREBIT - Test Templates Database
  * All blood test templates with reference ranges
  */
+
+const TEST_PRICES = {
+    "Complete Blood Count (CBC)": 150,
+    "Differential Leucocyte Count (DLC)": 100,
+    "ESR": 50,
+    "Blood Group & Rh Typing": 100,
+    "Lipid Profile": 450,
+    "Liver Function Test (LFT)": 350,
+    "Kidney Function Test (KFT/RFT)": 400,
+    "Blood Sugar / Glucose Tests": 80,
+    "Thyroid Function Test (TFT)": 500,
+    "Urine Routine & Microscopy": 120,
+    "Coagulation Profile": 600,
+    "Iron Studies": 550,
+    "Vitamin Profile": 1200,
+    "C-Reactive Protein (CRP)": 350,
+    "Rheumatoid Factor (RA Factor)": 400,
+    "ASO Titre": 350,
+    "Widal Test": 250,
+    "Dengue Serology": 600,
+    "Malaria Panel": 300,
+    "HIV Screening": 450,
+    "HBsAg (Hepatitis B)": 350,
+    "HCV (Hepatitis C)": 450,
+    "Serum Electrolytes": 400,
+    "Pancreatic Function": 600,
+    "Cardiac Markers": 1500,
+    "Hormone Panel (Female)": 2000,
+    "Diabetes Panel (Advanced)": 1200,
+    "Stool Routine & Microscopy": 150,
+    "Semen Analysis": 500,
+    "Peripheral Blood Smear": 300,
+    "Pregnancy Test": 250,
+    "Tumor Markers": 2500,
+    "Typhidot (Rapid)": 450,
+    "Urine Culture & Sensitivity": 600,
+    "Viral Markers Profile": 1200,
+    "Arthritis Profile": 1500
+};
+
 
 const TEST_TEMPLATES = {
     "Complete Blood Count (CBC)": {
@@ -521,3 +561,4 @@ function getTemplateStats() {
     const totalCategories = Object.keys(categories).length;
     return { totalPanels, totalParams, totalCategories, categories };
 }
+

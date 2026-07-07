@@ -1,5 +1,5 @@
-# LabDesk - Robots.txt
-# https://labdesk.pages.dev
+﻿# CUREBIT - Robots.txt
+# https://CUREBIT.pages.dev
 
 User-agent: *
 Allow: /
@@ -11,7 +11,7 @@ Disallow: /js/
 Disallow: /css/
 
 # Sitemap location
-Sitemap: https://labdesk.pages.dev/sitemap.xml
+Sitemap: https://CUREBIT.pages.dev/sitemap.xml
 
 # Google specific
 User-agent: Googlebot
@@ -27,4 +27,5 @@ Crawl-delay: 2
 User-agent: Yandex
 Allow: /
 Crawl-delay: 3
+
 

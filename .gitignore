@@ -1,0 +1,5 @@
+node_modules/
+.wrangler/
+rzp-key*.csv
+tests/
+SECURITY_AUDIT_REPORT.md

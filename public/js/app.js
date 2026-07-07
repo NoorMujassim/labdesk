@@ -1,5 +1,5 @@
 /**
- * LabDesk - Main Application Router & Init (Firebase Auth)
+ * CUREBIT - Main Application Router & Init (Firebase Auth)
  */
 
 let currentPage = 'dashboard';
@@ -42,28 +42,23 @@ auth.onAuthStateChanged(async (user) => {
         isAdmin = await DB.checkIfAdmin();
         console.log('Is Admin:', isAdmin);
 
-        // Auto-register verified users
-        if (user.emailVerified) {
-            DB.registerVerifiedUser(user).catch(console.error);
-        }
 
-        // CRITICAL: 48-hour email verification check (except for admin)
-        if (!isAdmin && !user.emailVerified) {
-            // Get user's creation time from Firebase Auth
-            const creationTime = new Date(user.metadata.creationTime);
-            const now = new Date();
-            const hoursSinceCreation = (now - creationTime) / (1000 * 60 * 60);
-
-            console.log('Account age (hours):', hoursSinceCreation.toFixed(2));
-
-            // If account is older than 48 hours and email not verified, BLOCK ACCESS
-            if (hoursSinceCreation > 48) {
-                console.log('⛔ Email verification required - 48 hours exceeded');
-                document.getElementById('authScreen').classList.remove('hidden');
-                document.getElementById('app').classList.add('hidden');
-                renderVerifyEmail(user);
-                return; // BLOCK access until verification
+        // Check if user has an email verification bypass from Super Admin
+        let isEmailBypassed = false;
+        try {
+            const userDoc = await DB.userDoc().get();
+            if (userDoc.exists && userDoc.data().emailVerifiedBypass === true) {
+                isEmailBypassed = true;
             }
+        } catch (e) { /* ignore */ }
+
+        // CRITICAL: Strict email verification check (except for admin or bypassed)
+        if (!isAdmin && !user.emailVerified && !isEmailBypassed) {
+            console.log('⛔ Email verification required');
+            document.getElementById('authScreen').classList.remove('hidden');
+            document.getElementById('app').classList.add('hidden');
+            renderVerifyEmail(user);
+            return; // BLOCK access until verification
         }
 
         if (isAdmin) {
@@ -74,11 +69,11 @@ auth.onAuthStateChanged(async (user) => {
             await updateLabNameHeader();
             showPage('dashboard');
         } else {
-            // Check Trial / Subscription Status
-            const isApprovedOrTrial = await DB.checkApproval();
-            console.log('Access Granted:', isApprovedOrTrial);
+            // Check Subscription Status
+            const hasActiveSubscription = await DB.checkApproval();
+            console.log('Subscription Active:', hasActiveSubscription);
 
-            if (isApprovedOrTrial) {
+            if (hasActiveSubscription) {
                 document.getElementById('authScreen').classList.add('hidden');
                 document.getElementById('app').classList.remove('hidden');
                 renderSidebar();
@@ -86,20 +81,17 @@ auth.onAuthStateChanged(async (user) => {
                 await updateLabNameHeader();
                 showPage('dashboard');
 
-                // Show email verification reminder if not verified (within 48 hours)
-                if (!user.emailVerified) {
-                    const creationTime = new Date(user.metadata.creationTime);
-                    const now = new Date();
-                    const hoursRemaining = 48 - ((now - creationTime) / (1000 * 60 * 60));
+                if (sessionStorage.getItem('paymentSuccess') === 'true') {
+                    sessionStorage.removeItem('paymentSuccess');
+                    showToast('Payment Captured! Plan Activated 🚀', 'success');
+                }
 
-                    setTimeout(() => {
-                        if (hoursRemaining > 0) {
-                            showToast(`📧 Please verify your email within ${Math.floor(hoursRemaining)} hours or access will be blocked!`, 'warning');
-                        }
-                    }, 2000);
+                // Show email verification reminder if not verified (though verification is now strict)
+                if (!user.emailVerified) {
+                    showToast('📧 Please verify your email to secure your account!', 'warning');
                 }
             } else {
-                // Trial Expired & No Subscription -> Force Subscription Page
+                // No active subscription -> Force Subscription Page
                 document.getElementById('authScreen').classList.add('hidden');
                 document.getElementById('app').classList.remove('hidden');
 
@@ -109,7 +101,7 @@ auth.onAuthStateChanged(async (user) => {
                 await updateLabNameHeader();
 
                 showPage('subscription');
-                showToast('Your free trial has expired. Please upgrade to continue.', 'error');
+                showToast('Active subscription required. Please upgrade to continue.', 'error');
 
                 // Disable navigation to other pages
                 document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -175,27 +167,44 @@ function renderUserInfo(user) {
 
 // ==================== NAVIGATION ====================
 function showPage(page) {
+    // 1. Critical Cleanup: Close any open modals to prevent UI overlap
+    if (typeof closeModal === 'function') closeModal();
+    
+    // 2. Global State Reset
     currentPage = page;
     editingReportId = null;
 
-    // Update nav active state
+    // 3. Update nav active state
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('active-nav');
         if (btn.dataset.page === page) btn.classList.add('active-nav');
     });
 
-    // Update header
+    // 4. Update header titles & context-aware header actions
     const titles = PAGE_TITLES[page] || [page, ''];
     document.getElementById('pageTitle').textContent = titles[0];
     document.getElementById('pageSubtitle').textContent = titles[1];
 
-    // Animate container
+    const headerNewReportBtn = document.getElementById('headerNewReportBtn');
+    if (headerNewReportBtn) {
+        if (page === 'patients') {
+            headerNewReportBtn.classList.add('hidden');
+        } else {
+            headerNewReportBtn.classList.remove('hidden');
+        }
+    }
+
+    // 5. Animate & Clear Container
     const container = document.getElementById('pageContainer');
     container.classList.remove('fade-in');
+    
+    // Force DOM clear to prevent overlaps
+    container.innerHTML = ''; 
+    
     void container.offsetWidth;
     container.classList.add('fade-in');
 
-    // Render page (async pages)
+    // 6. Route to Page Renderer
     switch (page) {
         case 'dashboard': renderDashboard(); break;
         case 'patients': renderPatients(); break;
@@ -208,10 +217,13 @@ function showPage(page) {
         case 'admin': if (isAdmin) renderAdminPanel(); else showPage('dashboard'); break;
     }
 
-    // Close mobile menu
-    document.getElementById('sidebar').classList.remove('mobile-open');
-    document.getElementById('mobileOverlay').classList.add('hidden');
+    // 7. Mobile UI Cleanup
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) sidebar.classList.remove('mobile-open');
+    const overlay = document.getElementById('mobileOverlay');
+    if (overlay) overlay.classList.add('hidden');
 }
+
 
 // ==================== SIDEBAR TOGGLE ====================
 function toggleSidebar() {
@@ -232,13 +244,15 @@ async function updateLabNameHeader() {
     try {
         const lab = await DB.getLabProfile();
         const el = document.getElementById('labNameHeader');
-        if (lab && lab.labName && lab.labName !== 'My Lab') {
-            el.textContent = lab.labName;
-            el.classList.remove('hidden');
-        } else {
+        let nameDisplay = lab?.labName || '';
+        if (!nameDisplay || nameDisplay.toUpperCase() === 'MY LAB' || nameDisplay.toUpperCase() === 'LABDESK') {
             el.classList.add('hidden');
+        } else {
+            el.textContent = nameDisplay;
+            el.classList.remove('hidden');
         }
     } catch (e) {
         console.error('updateLabNameHeader error:', e);
     }
 }
+

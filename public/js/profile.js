@@ -1,5 +1,5 @@
 /**
- * LabDesk - User Profile Page (Firebase/Async)
+ * CUREBIT - User Profile Page (Firebase/Async)
  * Identity, Contact, Account Security, Login History
  */
 
@@ -57,7 +57,7 @@ async function getProfileData() {
 
 async function saveProfileData(profileData) {
     try {
-        await DB.userDoc().set(profileData, { merge: true });
+        await DB.saveLabProfile(profileData);
         return true;
     } catch (e) {
         console.error('saveProfileData error:', e);
@@ -639,11 +639,13 @@ async function handleProfilePhoto(e) {
     showToast('Uploading photo...', 'info');
 
     try {
-        const ref = storage.ref(`profiles/${DB.userId}/photo`);
-        await ref.put(file);
-        const url = await ref.getDownloadURL();
+        const result = await CloudinaryService.uploadImage(file, `curebit/labs/${DB.tenantId}/profile`);
+        const url = result.secure_url;
 
-        await saveProfileData({ profilePhoto: url });
+        await saveProfileData({
+            profilePhoto: url,
+            profilePhotoPublicId: result.public_id
+        });
         await auth.currentUser.updateProfile({ photoURL: url });
 
         const avatar = document.getElementById('profileAvatar');
@@ -731,3 +733,4 @@ async function deleteAccount() {
         }
     }
 }
+

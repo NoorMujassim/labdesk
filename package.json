@@ -1,0 +1,13 @@
+{
+  "name": "CUREBIT",
+  "version": "1.0.0",
+  "description": "CUREBIT Static Site",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx -y live-server public --entry-file=index.html",
+    "test": "node --test tests/security-audit.test.js tests/worker-auth.test.js"
+  },
+  "dependencies": {
+    "live-server": "^1.2.2"
+  }
+}

@@ -1,5 +1,5 @@
-/**
- * LabDesk - Lab Settings Page (Firebase/Async)
+﻿/**
+ * CUREBIT - Lab Settings Page (Firebase/Async)
  */
 
 async function renderSettings() {
@@ -10,7 +10,7 @@ async function renderSettings() {
         const lab = await DB.getLabProfile();
 
         container.innerHTML = `
-            <div style="max-width:800px;" class="space-y-5 fade-in">
+            <div style="max-width:1200px;width:100%;" class="space-y-5 fade-in">
                 <!-- Lab Profile -->
                 <div class="card" style="padding:24px;">
                     <h3 class="card-title" style="margin-bottom:16px;">Lab Profile</h3>
@@ -54,7 +54,7 @@ async function renderSettings() {
                         </div>
                         <div>
                             <input type="file" id="logoInput" accept="image/*" onchange="handleLogo(event)" style="font-size:13px;color:var(--gray-500);">
-                            <p class="text-xs text-gray-400" style="margin-top:4px;">PNG, JPG. Uploaded to Firebase Storage.</p>
+                            <p class="text-xs text-gray-400" style="margin-top:4px;">PNG, JPG. Uploaded to Cloudinary ☁️</p>
                             <p id="logoUploadStatus" class="text-xs text-primary hidden" style="margin-top:4px;">Uploading...</p>
                             ${lab.logo ? '<button onclick="removeLogo()" class="text-xs text-danger font-medium" style="margin-top:4px;border:none;background:none;cursor:pointer;">Remove Logo</button>' : ''}
                         </div>
@@ -193,7 +193,7 @@ async function handleLogo(e) {
     }
 
     const status = document.getElementById('logoUploadStatus');
-    if (status) { status.classList.remove('hidden'); status.textContent = 'Uploading to Firebase...'; }
+    if (status) { status.classList.remove('hidden'); status.textContent = 'Uploading to Cloudinary...'; }
 
     try {
         const url = await DB.uploadLogo(file);
@@ -294,3 +294,4 @@ function toggleTemplateDetail(card) {
     const detail = card.querySelector('.template-detail');
     if (detail) detail.classList.toggle('show');
 }
+

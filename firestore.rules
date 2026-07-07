@@ -1,85 +1,64 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper function: Check if user is authenticated
-    function isSignedIn() {
-      return request.auth != null;
-    }
-    
-    // Helper function: Get user ID
-    function getUserId() {
-      return request.auth.uid;
-    }
-    
-    // Helper function: Check if user is admin
-    function isAdmin() {
-      return isSignedIn() && (
-        // Method 1: Check admin collection
-        exists(/databases/$(database)/documents/admin/config) &&
-        get(/databases/$(database)/documents/admin/config).data.adminUid == getUserId()
-      ) || (
-        // Method 2: Check user's isAdmin field
-        exists(/databases/$(database)/documents/users/$(getUserId())) &&
-        get(/databases/$(database)/documents/users/$(getUserId())).data.isAdmin == true
+    function signedIn() { return request.auth != null; }
+    function uid() { return request.auth.uid; }
+    function admin() {
+      return signedIn() && (
+        (exists(/databases/$(database)/documents/admin/config) && get(/databases/$(database)/documents/admin/config).data.adminUid == uid()) ||
+        (exists(/databases/$(database)/documents/users/$(uid())) && get(/databases/$(database)/documents/users/$(uid())).data.isAdmin == true)
       );
     }
-    
-    // Helper function: Check if user's email is verified
-    function isEmailVerified() {
-      return request.auth.token.email_verified == true;
+    function tenant(userId) { return signedIn() && uid() == userId; }
+    function tenantCreate(userId) { return request.resource.data.labId == userId; }
+    function tenantUpdate(userId) {
+      return request.resource.data.labId == userId
+        && (!('labId' in resource.data) || request.resource.data.labId == resource.data.labId);
     }
-    
-    // ==================== ADMIN COLLECTION ====================
-    match /admin/{document=**} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin();
+    function accountFieldsSafe() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasNone(['isAdmin', 'isApproved', 'approvedAt', 'plan', 'planStatus', 'planValidUntil']);
     }
-    
-    // ==================== USERS COLLECTION ====================
-    // Each user has their own document and subcollections
+
+    match /admin/{doc=**} { allow read, write: if admin(); }
+
     match /users/{userId} {
-      // User can read and write their own document
-      // ADMIN CAN READ ALL USERS AND WRITE TO ALL USERS (CRITICAL!)
-      allow read: if isSignedIn() && (getUserId() == userId || isAdmin());
-      allow write: if isSignedIn() && (getUserId() == userId || isAdmin());
-      
-      // User's patients subcollection
-      // ADMIN CAN ACCESS ALL PATIENTS
-      match /patients/{patientId} {
-        allow read, write: if isSignedIn() && (getUserId() == userId || isAdmin());
+      allow get: if tenant(userId) || admin();
+      allow list: if admin();
+      allow create: if (tenant(userId) && tenantCreate(userId)
+        && !request.resource.data.keys().hasAny(['isAdmin', 'isApproved'])) || admin();
+      allow update: if (tenant(userId) && tenantUpdate(userId) && accountFieldsSafe()) || admin();
+      allow delete: if tenant(userId) || admin();
+
+      match /patients/{docId} {
+        allow read, delete: if tenant(userId) || admin();
+        allow create: if (tenant(userId) && tenantCreate(userId)) || admin();
+        allow update: if (tenant(userId) && tenantUpdate(userId)) || admin();
       }
-      
-      // User's reports subcollection
-      // ADMIN CAN ACCESS ALL REPORTS
-      match /reports/{reportId} {
-        allow read, write: if isSignedIn() && (getUserId() == userId || isAdmin());
+      match /reports/{docId} {
+        allow read, delete: if tenant(userId) || admin();
+        allow create: if (tenant(userId) && tenantCreate(userId)) || admin();
+        allow update: if (tenant(userId) && tenantUpdate(userId)) || admin();
       }
-      
-      // User's subscriptions subcollection
-      // ADMIN CAN MANAGE ALL SUBSCRIPTIONS
-      match /subscriptions/{subscriptionId} {
-        allow read: if isSignedIn() && (getUserId() == userId || isAdmin());
-        allow write: if isSignedIn() && (getUserId() == userId || isAdmin());
+      match /subscriptions/{docId} {
+        allow read: if tenant(userId) || admin();
+        allow write: if admin();
       }
+      match /payments/{docId} {
+        allow read: if tenant(userId) || admin();
+        allow write: if admin();
+      }
+      match /{doc=**} { allow read, write: if false; }
     }
-    
-    // ==================== PENDING USERS (FOR APPROVAL SYSTEM) ====================
+
     match /pendingUsers/{userId} {
-      // Users can create their own pending request
-      allow create: if isSignedIn() && getUserId() == userId;
-      // Users can read their own pending status
-      allow read: if isSignedIn() && (getUserId() == userId || isAdmin());
-      // Only admin can update/delete pending requests
-      allow update, delete: if isAdmin();
+      allow create: if (tenant(userId) && request.resource.data.uid == userId) || admin();
+      allow read: if tenant(userId) || admin();
+      allow update, delete: if admin();
     }
-    
-    // ==================== APPROVED USERS ====================
     match /approvedUsers/{userId} {
-      // Anyone authenticated can read (for checking approval status)
-      allow read: if isSignedIn();
-      // Only admin can write
-      allow write: if isAdmin();
+      allow read: if tenant(userId) || admin();
+      allow write: if admin();
     }
   }
 }

@@ -1,6 +1,6 @@
-{
-    "name": "LabDesk - Blood Lab Test Report Software",
-    "short_name": "LabDesk",
+﻿{
+    "name": "CUREBIT - Blood Lab Test Report Software",
+    "short_name": "CUREBIT",
     "description": "Professional blood lab test report software for pathology labs. Generate reports with 200+ test templates.",
     "start_url": "/index.html",
     "display": "standalone",
@@ -22,3 +22,4 @@
     "related_applications": [],
     "prefer_related_applications": false
 }
+

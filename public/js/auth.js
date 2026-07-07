@@ -1,174 +1,212 @@
 /**
- * LabDesk - Authentication (Login / Signup / Reset Password)
- * Premium dark-themed auth UI
+ * CUREBIT - Authentication (Login / Signup / Reset Password)
+ * Synchromedics-style Split Layout
  */
 
 const urlParams = new URLSearchParams(window.location.search);
-let authMode = urlParams.get('mode') === 'signup' ? 'signup' : 'login'; // 'login', 'signup', 'reset'
+let authMode = urlParams.get('mode') === 'signup' ? 'signup' : 'login';
+let authRole = 'business'; // 'business' or 'clinic'
+
+function setAuthRole(role) {
+    authRole = role;
+    const btnBiz = document.getElementById('tabBiz');
+    const btnClinic = document.getElementById('tabClinic');
+    if (btnBiz && btnClinic) {
+        if (role === 'business') {
+            btnBiz.classList.add('active');
+            btnClinic.classList.remove('active');
+        } else {
+            btnClinic.classList.add('active');
+            btnBiz.classList.remove('active');
+        }
+    }
+}
 
 function renderAuth() {
     const container = document.getElementById('authContainer');
 
-    const logoSection = `
-        <div class="auth-logo">
-            <div class="auth-logo-icon">
-                <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+    const heroLeftSection = `
+        <div class="synchro-hero-panel">
+            <div class="synchro-dot-matrix"></div>
+            <div class="synchro-dot-matrix-br"></div>
+            
+            <div style="position:relative;z-index:2;">
+                <div style="margin-bottom:24px;">
+                    <img src="white.png" alt="CureBIT Logo" style="height:44px;width:auto;object-fit:contain;display:block;">
+                </div>
+                <h1 class="synchro-hero-title">Pathology & Medical Portal</h1>
+                <p class="synchro-hero-subtitle">Enterprise lab management & hospital-grade patient reports</p>
+                
+                <div class="synchro-feature-list">
+                    <div class="synchro-feature-item">
+                        <div class="synchro-feature-icon">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                        </div>
+                        <span>Smart Diagnostic Analytics</span>
+                    </div>
+                    <div class="synchro-feature-item">
+                        <div class="synchro-feature-icon">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                        </div>
+                        <span>200+ Test Parameter Templates</span>
+                    </div>
+                    <div class="synchro-feature-item">
+                        <div class="synchro-feature-icon">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                        </div>
+                        <span>A4 / A5 Hospital-Grade Printing</span>
+                    </div>
+                    <div class="synchro-feature-item">
+                        <div class="synchro-feature-icon">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                        </div>
+                        <span>Instant WhatsApp & PDF Delivery</span>
+                    </div>
+                    <div class="synchro-feature-item">
+                        <div class="synchro-feature-icon">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                        </div>
+                        <span>Cloud Sync & Data Security</span>
+                    </div>
+                </div>
             </div>
-            <h1 class="auth-title">LabDesk</h1>
-            <p class="auth-subtitle">Professional Blood Lab Report Management</p>
-        </div>
-    `;
-
-    const featuresFooter = `
-        <div class="auth-features">
-            <div class="auth-feature"><div class="auth-feature-dot"></div>Cloud Sync</div>
-            <div class="auth-feature"><div class="auth-feature-dot" style="background:#10b981;"></div>200+ Tests</div>
-            <div class="auth-feature"><div class="auth-feature-dot" style="background:#f59e0b;"></div>Print Reports</div>
-            <div class="auth-feature"><div class="auth-feature-dot" style="background:#06b6d4;"></div>Secure</div>
         </div>
     `;
 
     if (authMode === 'login') {
         container.innerHTML = `
-            <div class="auth-card slide-up">
-                ${logoSection}
-                <div class="auth-form">
-                    <h2 style="font-size:20px;font-weight:700;color:#f1f5f9;margin-bottom:4px;">Welcome Back</h2>
-                    <p style="font-size:13px;color:rgba(148,163,184,0.6);margin-bottom:24px;">Sign in to access your lab dashboard</p>
-
-                    <div id="authError" class="auth-error hidden"></div>
-
-                    <div class="space-y-4">
-                        <div>
-                            <label class="form-label">Email Address</label>
-                            <div style="position:relative;">
-                                <svg style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(148,163,184,0.4);" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                                <input type="email" id="authEmail" class="input-field" placeholder="you@example.com" style="padding-left:42px;" onkeydown="if(event.key==='Enter')document.getElementById('authPassword').focus()">
+            <div class="synchro-auth-card fade-in">
+                ${heroLeftSection}
+                
+                <div class="synchro-form-panel">
+                    <div>
+                        <div class="synchro-form-header">
+                            <div class="synchro-brand">
+                                <img src="black.png" alt="CureBIT Logo" style="height:32px;width:auto;object-fit:contain;display:block;">
                             </div>
+                            <button onclick="switchAuthMode('signup')" class="synchro-top-link">REGISTER</button>
                         </div>
-                        <div>
-                            <label class="form-label">Password</label>
-                            <div style="position:relative;">
-                                <svg style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(148,163,184,0.4);" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                <input type="password" id="authPassword" class="input-field" placeholder="Enter your password" style="padding-left:42px;" onkeydown="if(event.key==='Enter')handleLogin()">
+
+                        <h2 class="synchro-form-title">Login</h2>
+                        <p style="font-size:12.5px;color:#64748b;margin-top:-14px;margin-bottom:22px;font-weight:500;">Sign in to access your pathology laboratory dashboard</p>
+
+                        <div id="authError" class="auth-error hidden"></div>
+
+                        <form id="loginForm" onsubmit="event.preventDefault(); handleLogin();" class="synchro-form space-y-4">
+                            <div>
+                                <label class="form-label">Email Address</label>
+                                <input type="email" id="authEmail" class="input-field" placeholder="you@example.com" required autocomplete="email">
                             </div>
+                            <div>
+                                <label class="form-label">Password</label>
+                                <div style="position:relative;">
+                                    <input type="password" id="authPassword" class="input-field" placeholder="••••••••" required autocomplete="current-password" style="padding-right:40px;">
+                                    <button type="button" onclick="togglePasswordVisibility('authPassword', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;display:flex;padding:0;" title="Toggle Password">
+                                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
+                                <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#64748b;font-weight:600;cursor:pointer;user-select:none;">
+                                    <input type="checkbox" id="rememberMe" style="accent-color:#0284c7;width:15px;height:15px;border-radius:4px;">
+                                    Save User
+                                </label>
+                                <button type="button" onclick="switchAuthMode('reset')" style="background:none;border:none;color:#0284c7;font-size:11px;font-weight:800;letter-spacing:0.04em;cursor:pointer;text-transform:uppercase;">
+                                    FORGET PASSWORD?
+                                </button>
+                            </div>
+
+                            <button type="submit" id="authBtn" class="synchro-btn-primary" style="margin-top:16px;">
+                                LOGIN
+                            </button>
+                        </form>
+
+                        <div style="text-align:center;margin-top:16px;">
+                            <button type="button" onclick="handleGoogleLogin()" style="background:transparent;border:1px solid #cbd5e1;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;color:#334155;cursor:pointer;display:inline-flex;align-items:center;gap:8px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                                Google Login
+                            </button>
                         </div>
-                        <div style="text-align:right;">
-                            <button onclick="switchAuthMode('reset')" class="auth-link">Forgot Password?</button>
-                        </div>
-                        <button onclick="handleLogin()" id="authBtn" class="btn btn-primary btn-block btn-lg">
-                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
-                            Sign In
-                        </button>
                     </div>
-
-                    <div class="auth-divider"><span>OR</span></div>
-
-                    <button onclick="handleGoogleLogin()" class="btn btn-outline btn-block">
-                        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-                        Continue with Google
-                    </button>
-
-                    <p class="text-center text-sm" style="margin-top:24px;color:rgba(148,163,184,0.6);">
-                        Don't have an account? <button onclick="switchAuthMode('signup')" class="auth-link">Create Account</button>
-                    </p>
-
-                    ${featuresFooter}
                 </div>
             </div>
         `;
     } else if (authMode === 'signup') {
         container.innerHTML = `
-            <div class="auth-card slide-up">
-                ${logoSection}
-                <div class="auth-form">
-                    <h2 style="font-size:20px;font-weight:700;color:#f1f5f9;margin-bottom:4px;">Create Your Account</h2>
-                    <p style="font-size:13px;color:rgba(148,163,184,0.6);margin-bottom:24px;">Get started with LabDesk in seconds</p>
-
-                    <div id="authError" class="auth-error hidden"></div>
-
-                    <div class="space-y-4">
-                        <div>
-                            <label class="form-label">Lab / Your Name</label>
-                            <div style="position:relative;">
-                                <svg style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(148,163,184,0.4);" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                                <input type="text" id="authName" class="input-field" placeholder="Your lab or clinic name" style="padding-left:42px;">
+            <div class="synchro-auth-card fade-in">
+                ${heroLeftSection}
+                
+                <div class="synchro-form-panel">
+                    <div>
+                        <div class="synchro-form-header">
+                            <div class="synchro-brand">
+                                <img src="black.png" alt="CureBIT Logo" style="height:32px;width:auto;object-fit:contain;display:block;">
                             </div>
+                            <button onclick="switchAuthMode('login')" class="synchro-top-link">LOGIN</button>
                         </div>
-                        <div>
-                            <label class="form-label">Email Address</label>
-                            <div style="position:relative;">
-                                <svg style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(148,163,184,0.4);" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                                <input type="email" id="authEmail" class="input-field" placeholder="you@example.com" style="padding-left:42px;">
-                            </div>
-                        </div>
-                        <div class="grid grid-2 gap-3">
+
+                        <h2 class="synchro-form-title">Create Account</h2>
+
+                        <div id="authError" class="auth-error hidden"></div>
+
+                        <form id="signupForm" onsubmit="event.preventDefault(); handleSignup();" class="synchro-form space-y-3">
                             <div>
-                                <label class="form-label">Password</label>
-                                <div style="position:relative;">
-                                    <svg style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(148,163,184,0.4);" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                    <input type="password" id="authPassword" class="input-field" placeholder="Min 6 chars" style="padding-left:42px;">
-                                </div>
+                                <label class="form-label">Lab / Clinic Name</label>
+                                <input type="text" id="authName" class="input-field" placeholder="CureBIT Pathology Lab" required>
                             </div>
                             <div>
-                                <label class="form-label">Confirm</label>
-                                <div style="position:relative;">
-                                    <svg style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(148,163,184,0.4);" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                                    <input type="password" id="authPassword2" class="input-field" placeholder="Repeat" style="padding-left:42px;" onkeydown="if(event.key==='Enter')handleSignup()">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" id="authEmail" class="input-field" placeholder="you@example.com" required autocomplete="email">
+                            </div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                                <div>
+                                    <label class="form-label">Password</label>
+                                    <input type="password" id="authPassword" class="input-field" placeholder="••••••••" required autocomplete="new-password">
+                                </div>
+                                <div>
+                                    <label class="form-label">Confirm</label>
+                                    <input type="password" id="authPassword2" class="input-field" placeholder="••••••••" required autocomplete="new-password">
                                 </div>
                             </div>
-                        </div>
-                        <button onclick="handleSignup()" id="authBtn" class="btn btn-success btn-block btn-lg">
-                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
-                            Create Account
-                        </button>
+
+                            <button type="submit" id="authBtn" class="synchro-btn-primary" style="margin-top:16px;">
+                                REGISTER NOW
+                            </button>
+                        </form>
                     </div>
-
-                    <div class="auth-divider"><span>OR</span></div>
-
-                    <button onclick="handleGoogleLogin()" class="btn btn-outline btn-block">
-                        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-                        Continue with Google
-                    </button>
-
-                    <p class="text-center text-sm" style="margin-top:24px;color:rgba(148,163,184,0.6);">
-                        Already have an account? <button onclick="switchAuthMode('login')" class="auth-link">Sign In</button>
-                    </p>
                 </div>
             </div>
         `;
     } else if (authMode === 'reset') {
         container.innerHTML = `
-            <div class="auth-card slide-up">
-                ${logoSection}
-                <div class="auth-form">
-                    <div style="text-align:center;margin-bottom:24px;">
-                        <div style="width:56px;height:56px;margin:0 auto 16px;background:rgba(245,158,11,0.1);border-radius:16px;display:flex;align-items:center;justify-content:center;">
-                            <svg width="28" height="28" fill="none" stroke="#f59e0b" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
-                        </div>
-                        <h2 style="font-size:20px;font-weight:700;color:#f1f5f9;margin-bottom:4px;">Reset Password</h2>
-                        <p style="font-size:13px;color:rgba(148,163,184,0.6);">We'll send a reset link to your email</p>
-                    </div>
-
-                    <div id="authError" class="auth-error hidden"></div>
-
-                    <div class="space-y-4">
-                        <div>
-                            <label class="form-label">Email Address</label>
-                            <div style="position:relative;">
-                                <svg style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(148,163,184,0.4);" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                                <input type="email" id="authEmail" class="input-field" placeholder="you@example.com" style="padding-left:42px;" onkeydown="if(event.key==='Enter')handleResetPassword()">
+            <div class="synchro-auth-card fade-in">
+                ${heroLeftSection}
+                
+                <div class="synchro-form-panel">
+                    <div>
+                        <div class="synchro-form-header">
+                            <div class="synchro-brand">
+                                <img src="black.png" alt="CureBIT Logo" style="height:32px;width:auto;object-fit:contain;display:block;">
                             </div>
+                            <button onclick="switchAuthMode('login')" class="synchro-top-link">LOGIN</button>
                         </div>
-                        <button onclick="handleResetPassword()" id="authBtn" class="btn btn-warning btn-block btn-lg">
-                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            Send Reset Link
-                        </button>
-                    </div>
 
-                    <p class="text-center text-sm" style="margin-top:24px;color:rgba(148,163,184,0.6);">
-                        Remember your password? <button onclick="switchAuthMode('login')" class="auth-link">Back to Sign In</button>
-                    </p>
+                        <h2 class="synchro-form-title">Reset Password</h2>
+                        <p style="font-size:12.5px;color:#64748b;margin-top:-14px;margin-bottom:20px;">We'll send a reset recovery link to your email.</p>
+
+                        <div id="authError" class="auth-error hidden"></div>
+
+                        <form id="resetForm" onsubmit="event.preventDefault(); handleResetPassword();" class="synchro-form space-y-4">
+                            <div>
+                                <label class="form-label">Email Address</label>
+                                <input type="email" id="authEmail" class="input-field" placeholder="you@example.com" required>
+                            </div>
+                            <button type="submit" id="authBtn" class="synchro-btn-primary" style="margin-top:16px;">
+                                SEND RESET LINK
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         `;
@@ -269,7 +307,11 @@ async function handleSignup() {
         await cred.user.sendEmailVerification();
 
         DB.setUser(cred.user.uid);
-        await DB.saveLabProfile({ labName: name, email: email });
+        await DB.saveLabProfile({ 
+            labName: name, 
+            email: email,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
         // onAuthStateChanged will handle the rest
     } catch (e) {
         setAuthLoading(false);
@@ -290,7 +332,8 @@ async function handleGoogleLogin() {
             DB.setUser(result.user.uid);
             await DB.saveLabProfile({
                 labName: result.user.displayName || 'My Lab',
-                email: result.user.email || ''
+                email: result.user.email || '',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
         }
     } catch (e) {
@@ -325,13 +368,43 @@ async function handleResetPassword() {
     }
 }
 
-async function handleLogout() {
-    if (!confirm('Are you sure you want to logout?')) return;
-    try {
-        await auth.signOut();
-    } catch (e) {
-        showToast('Logout failed: ' + e.message, 'error');
+async function clearSensitiveClientState() {
+    DB.clearAllCaches();
+    DB.userId = null;
+    DB.tenantId = null;
+    document.getElementById('pageContainer').replaceChildren();
+    document.getElementById('modalContainer').replaceChildren();
+    document.getElementById('printArea').replaceChildren();
+    document.getElementById('curebit_print_frame')?.remove();
+    localStorage.clear();
+    sessionStorage.clear();
+    if (window.indexedDB && indexedDB.databases) {
+        const databases = await indexedDB.databases().catch(() => []);
+        await Promise.all(databases.map(db => new Promise(resolve => {
+            if (!db.name) return resolve();
+            const request = indexedDB.deleteDatabase(db.name);
+            request.onsuccess = request.onerror = request.onblocked = () => resolve();
+        })));
     }
+}
+
+async function handleLogout() {
+    showConfirmModal({
+        title: 'Logout Confirm',
+        message: 'Are you sure you want to logout of your CureBIT session?',
+        confirmText: 'Logout',
+        cancelText: 'Stay Logged In',
+        type: 'danger',
+        onConfirm: async () => {
+            try {
+                await auth.signOut();
+                await clearSensitiveClientState();
+                location.reload();
+            } catch (e) {
+                showToast('Logout failed: ' + e.message, 'error');
+            }
+        }
+    });
 }
 
 // ==================== APPROVAL SCREENS ====================
@@ -344,7 +417,7 @@ function renderApprovalRequest(user) {
                 <div class="auth-logo-icon">
                     <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
                 </div>
-                <h1 class="auth-title">LabDesk</h1>
+                <h1 class="auth-title">CUREBIT</h1>
                 <p class="auth-subtitle">Professional Blood Lab Report Management</p>
             </div>
             <div class="auth-form">
@@ -386,7 +459,7 @@ function renderApprovalRequest(user) {
                         <strong style="color:#a5b4fc;">ℹ How it works:</strong><br>
                         1. Submit your lab details<br>
                         2. Admin will review your request<br>
-                        3. Once approved, you can start using LabDesk
+                        3. Once approved, you can start using CUREBIT
                     </p>
                 </div>
 
@@ -430,7 +503,7 @@ function renderPendingApproval(user) {
                 <div class="auth-logo-icon" style="background:linear-gradient(135deg, #f59e0b, #d97706);">
                     <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
-                <h1 class="auth-title">LabDesk</h1>
+                <h1 class="auth-title">CUREBIT</h1>
                 <p class="auth-subtitle">Professional Blood Lab Report Management</p>
             </div>
             <div class="auth-form" style="text-align:center;">
@@ -489,7 +562,7 @@ function renderRejected(user) {
                 <div class="auth-logo-icon" style="background:linear-gradient(135deg, #ef4444, #dc2626);">
                     <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
                 </div>
-                <h1 class="auth-title">LabDesk</h1>
+                <h1 class="auth-title">CUREBIT</h1>
                 <p class="auth-subtitle">Professional Blood Lab Report Management</p>
             </div>
             <div class="auth-form" style="text-align:center;">
@@ -549,7 +622,7 @@ function renderVerifyEmail(user) {
                     <div style="padding:16px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:12px;margin-bottom:20px;">
                         <p style="font-size:13px;color:#fca5a5;font-weight:600;margin-bottom:8px;">⚠️ 48-Hour Deadline Exceeded</p>
                         <p style="font-size:12px;color:rgba(252,165,165,0.8);">
-                            Your account was created more than 48 hours ago. You must verify your email to continue using LabDesk.
+                            Your account was created more than 48 hours ago. You must verify your email to continue using CUREBIT.
                         </p>
                     </div>
                 ` : `
@@ -780,7 +853,7 @@ async function renderAdminPanel() {
 }
 
 async function adminApproveUser(userId) {
-    if (!confirm('Approve this user? They will be able to access LabDesk.')) return;
+    if (!confirm('Approve this user? They will be able to access CUREBIT.')) return;
     try {
         await DB.approveUser(userId);
         showToast('User approved successfully! ✅');
@@ -791,7 +864,7 @@ async function adminApproveUser(userId) {
 }
 
 async function adminRejectUser(userId) {
-    if (!confirm('Reject this user? They will not be able to access LabDesk.')) return;
+    if (!confirm('Reject this user? They will not be able to access CUREBIT.')) return;
     try {
         await DB.rejectUser(userId);
         showToast('User rejected');
@@ -802,7 +875,7 @@ async function adminRejectUser(userId) {
 }
 
 async function adminRevokeUser(userId, name) {
-    if (!confirm('Revoke access for "' + name + '"? They will no longer be able to use LabDesk.')) return;
+    if (!confirm('Revoke access for "' + name + '"? They will no longer be able to use CUREBIT.')) return;
     try {
         await DB.revokeUser(userId);
         showToast('User access revoked');
@@ -929,39 +1002,69 @@ async function handleCreateUser() {
         btn.innerHTML = '<div class="btn-loader"></div> Creating...';
     }
 
+    let tempApp = null;
+
     try {
-        // Create user with Firebase
-        const cred = await auth.createUserWithEmailAndPassword(email, password);
+        // Initialize a secondary Firebase App instance to create the user without signing out the Admin
+        tempApp = firebase.initializeApp(firebaseConfig, "TempApp_" + Date.now());
+        const tempAuth = firebase.auth(tempApp);
+
+        // Create the user on the secondary app instance
+        const cred = await tempAuth.createUserWithEmailAndPassword(email, password);
         const newUserId = cred.user.uid;
 
-        // Update profile
+        // Update profile in the temp app instance
         await cred.user.updateProfile({ displayName: labName });
 
-        // Set user data
-        DB.setUser(newUserId);
+        // Detect if current creator is the designated Super Admin
+        const currentAdmin = auth.currentUser;
+        const isSuperAdmin = currentAdmin && currentAdmin.email === 'noormujassimraza@gmail.com';
 
-        // Save lab profile
-        await DB.saveLabProfile({
+        // We write to the collections using the Admin's Firestore permissions
+        // 1. Save the lab profile document under `/users/{newUserId}`
+        await firestore.collection('users').doc(newUserId).set({
             labName: labName,
-            email: email
+            labId: newUserId,
+            email: email,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            ...(isSuperAdmin ? { emailVerifiedBypass: true } : {})
+        }, { merge: true });
+
+        // 2. Create the pending user record
+        await firestore.collection('pendingUsers').doc(newUserId).set({
+            uid: newUserId,
+            name: labName,
+            labName: labName,
+            email: email,
+            status: 'pending',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        // Auto-approve if checked
-        if (autoApprove) {
+        // 3. Auto-approve if selected OR if creator is Super Admin
+        if (autoApprove || isSuperAdmin) {
             await DB.approveUser(newUserId);
+            // Explicitly ensure emailVerifiedBypass is set on the user doc after DB.approveUser
+            if (isSuperAdmin) {
+                await firestore.collection('users').doc(newUserId).set({
+                    emailVerifiedBypass: true
+                }, { merge: true });
+            }
         }
 
-        // Sign out the newly created user (keep admin logged in)
-        await cred.user.delete(); // Delete the session
-
-        // Re-create the user account in Firebase (workaround)
-        // Actually, we need a different approach - let's just create and approve
+        // Clean up
+        await tempAuth.signOut();
+        await tempApp.delete();
 
         showToast(`User created successfully! ${autoApprove ? '(Auto-approved)' : '(Pending approval)'}`, 'success');
         hideCreateUserModal();
         renderAdminPanel();
 
     } catch (e) {
+        console.error('handleCreateUser Error:', e);
+        if (tempApp) {
+            try { await tempApp.delete(); } catch(err) {}
+        }
+
         if (btn) {
             btn.disabled = false;
             btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg> Create User';
@@ -976,3 +1079,16 @@ async function handleCreateUser() {
         showCreateUserError(messages[e.code] || e.message);
     }
 }
+
+function togglePasswordVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    if (input.type === 'password') {
+        input.type = 'text';
+        btn.style.color = '#818cf8';
+    } else {
+        input.type = 'password';
+        btn.style.color = 'rgba(148,163,184,0.5)';
+    }
+}
+

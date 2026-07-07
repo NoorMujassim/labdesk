@@ -1,5 +1,5 @@
 /**
- * LabDesk - Firebase Configuration & Initialization
+ * CureBIT - Firebase Configuration & Initialization
  */
 
 const firebaseConfig = {
@@ -20,14 +20,8 @@ const firestore = firebase.firestore();
 const storage = firebase.storage();
 const analytics = firebase.analytics();
 
-// Enable Firestore offline persistence
-firestore.enablePersistence({ synchronizeTabs: true })
-    .catch(err => {
-        if (err.code === 'failed-precondition') {
-            console.warn('Firestore persistence failed: Multiple tabs open');
-        } else if (err.code === 'unimplemented') {
-            console.warn('Firestore persistence not available in this browser');
-        }
-    });
+// PHI must not survive sign-out in a persistent browser database. Firestore's
+// default in-memory cache is intentionally used instead of IndexedDB persistence.
 
 console.log('Firebase initialized successfully');
+

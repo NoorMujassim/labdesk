@@ -13,31 +13,30 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="apple-touch-icon" href="/favicon.svg">
+    <link rel="icon" type="image/png" href="black.png">
+    <link rel="apple-touch-icon" href="black.png">
 
     <!-- SEO Meta Tags -->
-    <title>LabDesk - Professional Blood Lab Test Report Software | Dashboard</title>
+    <title>CUREBIT - Professional Blood Lab Test Report Software | Dashboard</title>
     <meta name="description"
-        content="LabDesk dashboard - Generate professional blood lab test reports with 200+ templates. Manage patients, print hospital-grade reports. Free cloud-based lab management software.">
+        content="CUREBIT dashboard - Generate professional blood lab test reports with 200+ templates. Manage patients, print hospital-grade reports. Free cloud-based lab management software.">
     <meta name="keywords"
         content="lab report software, blood test report, pathology lab software, lab management system, CBC report, LFT report, KFT report, thyroid test, diagnostic center software">
-    <meta name="author" content="LabDesk">
+    <meta name="author" content="CUREBIT">
     <meta name="robots" content="noindex, nofollow">
     <meta name="theme-color" content="#4f46e5">
 
     <!-- Open Graph -->
-    <meta property="og:title" content="LabDesk - Lab Management Dashboard">
+    <meta property="og:title" content="CUREBIT - Lab Management Dashboard">
     <meta property="og:description"
         content="Professional blood lab test report software. 200+ test templates, patient management, cloud storage.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://labdesk-18c70.web.app/index.html">
+    <meta property="og:url" content="https://CUREBIT-18c70.web.app/index.html">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%234f46e5'/><text x='50' y='68' text-anchor='middle' fill='white' font-size='50' font-family='Arial' font-weight='bold'>L</text></svg>">
+    <link rel="icon" type="image/png" href="black.png">
     <link rel="manifest" href="manifest.json">
-    <link rel="canonical" href="https://labdesk-18c70.web.app/index.html">
+    <link rel="canonical" href="https://CUREBIT-18c70.web.app/index.html">
 
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-EMBYS1CSGJ"></script>
@@ -50,7 +49,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=3.0">
 </head>
 
 <body>
@@ -78,16 +77,11 @@
         <!-- Sidebar -->
         <aside id="sidebar" class="sidebar">
             <div class="sidebar-header">
-                <div class="sidebar-logo-icon">
-                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                    </svg>
-                </div>
-                <div class="logo-text">
-                    <h1 class="sidebar-title">LabDesk</h1>
-                    <p class="sidebar-subtitle">Lab Management</p>
-                </div>
+                <a href="#" class="brand-container" onclick="showPage('dashboard')">
+                    <div class="logo-wrapper">
+                        <img src="white.png" alt="CureBIT Logo" class="brand-logo">
+                    </div>
+                </a>
             </div>
             <nav class="sidebar-nav" id="sidebarNav"></nav>
             <div class="sidebar-footer">
@@ -116,12 +110,12 @@
                     </button>
                     <div>
                         <h2 id="pageTitle" class="topbar-title">Dashboard</h2>
-                        <p id="pageSubtitle" class="topbar-subtitle">Welcome to LabDesk</p>
+                        <p id="pageSubtitle" class="topbar-subtitle">Welcome to CUREBIT</p>
                     </div>
                 </div>
                 <div class="topbar-right">
                     <span id="labNameHeader" class="lab-name-badge hidden"></span>
-                    <button onclick="showPage('newReport')" class="btn btn-primary btn-sm">
+                    <button id="headerNewReportBtn" onclick="showPage('newReport')" class="btn btn-primary btn-sm">
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
@@ -155,7 +149,7 @@
     <!-- Toast Container -->
     <div id="toastContainer"></div>
 
-    <!-- Firebase SDK v9 Compat (works like v8 but is v9) -->
+    <!-- Firebase SDK v9 Compat -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -164,20 +158,38 @@
 
     <!-- App Scripts -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script src="js/firebase-config.js"></script>
-    <script src="js/db.js?v=1.1"></script>
-    <script src="js/templates.js?v=1.1"></script>
-    <script src="js/utils.js?v=1.1"></script>
-    <script src="js/auth.js?v=1.1"></script>
-    <script src="js/dashboard.js?v=1.1"></script>
-    <script src="js/patients.js?v=1.1"></script>
-    <script src="js/newReport.js?v=1.1"></script>
-    <script src="js/reports.js?v=1.1"></script>
-    <script src="js/settings.js?v=1.1"></script>
-    <script src="js/profile.js?v=1.1"></script>
-    <script src="js/subscription.js?v=1.1"></script>
-    <script src="js/app.js?v=1.1"></script>
+    <script src="js/firebase-config.js?v=27.0"></script>
+    <script src="js/cloudinaryService.js?v=27.0"></script>
+    <script src="js/db.js?v=27.0"></script>
+    <script src="js/templates.js?v=27.0"></script>
+    <script src="js/utils.js?v=27.0"></script>
+    <script src="js/auth.js?v=27.0"></script>
+    <script src="js/dashboard.js?v=27.0"></script>
+    <script src="js/patients.js?v=27.0"></script>
+    <script src="js/newReport.js?v=27.0"></script>
+    <script src="js/reports.js?v=27.0"></script>
+    <script src="js/settings.js?v=27.0"></script>
+    <script src="js/profile.js?v=27.0"></script>
+    <script src="js/workerClient.js?v=27.0"></script>
+    <script src="js/subscription.js?v=27.0"></script>
+    <script src="js/app.js?v=27.0"></script>
 
 </body>
 
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
