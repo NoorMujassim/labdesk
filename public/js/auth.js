@@ -965,14 +965,54 @@ async function adminRevokeUser(userId, name) {
     }
 }
 
-async function adminGrantAccess(userId, name) {
-    if (!confirm('Grant 1 Year FREE Premium Access to "' + name + '"?\n\nThis will waive off all charges and activate the Premium Plan immediately.')) return;
+function adminGrantAccess(userId, name) {
+    const modalId = 'grantAccessModal';
+    if (document.getElementById(modalId)) document.getElementById(modalId).remove();
+
+    const modalHTML = `
+        <div id="${modalId}" class="modal-overlay" onclick="if(event.target===this)document.getElementById('${modalId}').remove()" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15, 23, 42, 0.7);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:9999;animation:fadeIn 0.2s;">
+            <div class="modal-content" style="background:#ffffff;border-radius:16px;max-width:420px;width:90%;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);overflow:hidden;animation:slideUp 0.3s;" onclick="event.stopPropagation()">
+                <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);padding:24px;text-align:center;">
+                    <div style="background:rgba(255,255,255,0.2);width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px auto;">
+                        <svg width="32" height="32" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <h3 style="margin:0;font-size:20px;font-weight:800;color:white;">Grant Premium Access</h3>
+                </div>
+                <div style="padding:24px;text-align:center;">
+                    <p style="font-size:15px;color:#475569;margin:0;line-height:1.5;">
+                        Are you sure you want to grant 1 Year FREE Premium Access to <strong style="color:#0f172a;">${name}</strong>?
+                    </p>
+                    <p style="font-size:14px;color:#64748b;margin-top:12px;margin-bottom:0;background:#f1f5f9;padding:10px;border-radius:8px;">
+                        This will waive off all charges and activate the Premium Plan immediately.
+                    </p>
+                </div>
+                <div style="display:flex;gap:12px;padding:20px 24px;background:#f8fafc;border-top:1px solid #e2e8f0;">
+                    <button class="btn btn-outline" style="flex:1;" onclick="document.getElementById('${modalId}').remove()">Cancel</button>
+                    <button class="btn btn-primary" style="flex:1;background:#10b981;border-color:#10b981;" onclick="confirmAdminGrantAccess('${userId}')">
+                        Grant Access
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+async function confirmAdminGrantAccess(userId) {
+    const modalId = 'grantAccessModal';
+    const btn = document.querySelector(`#${modalId} .btn-primary`);
+    if(btn) {
+        btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;margin-right:8px;"></span> Processing...';
+        btn.disabled = true;
+    }
 
     try {
         await DB.grantFreeSubscription(userId, 12); // Grant 12 months
-        showToast('Free Premium Access Granted! 🎁');
+        if (document.getElementById(modalId)) document.getElementById(modalId).remove();
+        showToast('Free Premium Access Granted! 🎁', 'success');
         renderAdminPanel();
     } catch (e) {
+        if (document.getElementById(modalId)) document.getElementById(modalId).remove();
         showToast('Error: ' + e.message, 'error');
     }
 }

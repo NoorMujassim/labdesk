@@ -384,7 +384,10 @@ const DB = {
                 techDegree: data.techDegree || '',
                 ownerName: data.ownerName || '',
                 signatureText: data.signatureText || '',
-                headerColor: data.headerColor || '#1e40af'
+                headerColor: data.headerColor || '#1e40af',
+                plan: data.plan || 'basic',
+                planStatus: data.planStatus || 'inactive',
+                planValidUntil: data.planValidUntil || null
             };
         } catch (e) {
             console.error('getLabProfile error:', e);
