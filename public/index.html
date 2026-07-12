@@ -45,78 +45,125 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- JSON-LD Structured Data -->
+    <!-- JSON-LD Structured Data (Phase 3) -->
     <script type="application/ld+json">
-    [
+    {
+      "@context": "https://schema.org",
+      "@graph": [
         {
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            "name": "CUREBIT",
-            "url": "https://curebit.umbrellainfo.space"
-        },
-        {
-            "@context": "https://schema.org",
+          "@type": "Organization",
+          "@id": "https://curebit.umbrellainfo.space/#organization",
+          "name": "CureBIT",
+          "url": "https://curebit.umbrellainfo.space/",
+          "description": "Enterprise Cloud Laboratory Information System and Pathology Software.",
+          "parentOrganization": {
             "@type": "Organization",
-            "name": "CUREBIT",
-            "url": "https://curebit.umbrellainfo.space",
-            "logo": "https://curebit.umbrellainfo.space/black.png",
-            "description": "Enterprise Pathology Laboratory Software"
+            "name": "Umbrella Info Space"
+          },
+          "logo": {
+            "@type": "ImageObject",
+            "@id": "https://curebit.umbrellainfo.space/#logo",
+            "url": "https://curebit.umbrellainfo.space/black.png",
+            "caption": "CureBIT Logo"
+          },
+          "image": {
+            "@id": "https://curebit.umbrellainfo.space/#logo"
+          },
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "Customer Support",
+            "url": "https://curebit.umbrellainfo.space/"
+          }
         },
         {
-            "@context": "https://schema.org",
-            "@type": "SoftwareApplication",
-            "name": "CUREBIT",
-            "applicationCategory": "HealthApplication",
-            "operatingSystem": "Web Browser",
-            "offers": {
-                "@type": "Offer",
-                "price": "0",
-                "priceCurrency": "INR",
-                "availability": "https://schema.org/InStock"
+          "@type": "WebSite",
+          "@id": "https://curebit.umbrellainfo.space/#website",
+          "url": "https://curebit.umbrellainfo.space/",
+          "name": "CureBIT",
+          "publisher": {
+            "@id": "https://curebit.umbrellainfo.space/#organization"
+          }
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://curebit.umbrellainfo.space/#webpage",
+          "url": "https://curebit.umbrellainfo.space/",
+          "name": "CureBIT | Cloud Laboratory Information System",
+          "description": "CureBIT Cloud Laboratory Management & Laboratory Information System for India. Advanced Pathology Software and Diagnostic Lab Software for Blood Test Reporting.",
+          "isPartOf": {
+            "@id": "https://curebit.umbrellainfo.space/#website"
+          },
+          "about": {
+            "@id": "https://curebit.umbrellainfo.space/#organization"
+          },
+          "primaryImageOfPage": {
+            "@type": "ImageObject",
+            "@id": "https://curebit.umbrellainfo.space/#hero-image",
+            "url": "https://curebit.umbrellainfo.space/black.png",
+            "caption": "CureBIT Primary Hero Image"
+          }
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://curebit.umbrellainfo.space/#software",
+          "name": "CureBIT",
+          "applicationCategory": "MedicalApplication",
+          "operatingSystem": "Web Browser, Windows, macOS, Linux, Android, iOS",
+          "softwareVersion": "1.0",
+          "provider": {
+            "@id": "https://curebit.umbrellainfo.space/#organization"
+          },
+          "url": "https://curebit.umbrellainfo.space/",
+          "description": "Hospital-grade, cloud-based pathology laboratory management software for generating blood test reports with 200+ templates.",
+          "isAccessibleForFree": false,
+          "requirements": "Modern Web Browser",
+          "offers": {
+            "@type": "Offer",
+            "price": "999",
+            "priceCurrency": "INR",
+            "availability": "https://schema.org/OnlineOnly"
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://curebit.umbrellainfo.space/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "How does the 7-day free trial work?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "You get instant, full access to all features for 7 days upon sign up with no credit card required. After 7 days, you can choose any subscription plan to continue."
+              }
             },
-            "aggregateRating": {
-                "@type": "AggregateRating",
-                "ratingValue": "4.9",
-                "ratingCount": "342"
+            {
+              "@type": "Question",
+              "name": "Do I need special printers or hardware?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No! CureBIT works on any standard web browser using your existing desktop, laptop, tablet, or smartphone. Reports print on any standard A4 or A5 printer."
+              }
             },
-            "description": "Hospital-grade, cloud-based pathology lab management software for generating blood test reports with 200+ templates.",
-            "url": "https://curebit.umbrellainfo.space",
-            "author": {
-                "@type": "Organization",
-                "name": "CUREBIT"
+            {
+              "@type": "Question",
+              "name": "Is my patient data secure?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. All patient records are encrypted and stored securely using Firebase Enterprise Cloud Security with 256-bit SSL encryption and automated backups."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I add my lab's logo and letterhead header?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Absolutely! You can upload your lab logo, set custom letterhead top margins, add doctor credentials, and upload signature images in Lab Settings."
+              }
             }
-        },
-        {
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-                {
-                    "@type": "Question",
-                    "name": "Is my laboratory data secure?",
-                    "acceptedAnswer": {
-                        "@type": "Answer",
-                        "text": "Yes, we use bank-level encryption, regular backups, and role-based access control. Your data is stored securely on cloud infrastructure with 99.9% uptime."
-                    }
-                },
-                {
-                    "@type": "Question",
-                    "name": "Can I customize the report formats?",
-                    "acceptedAnswer": {
-                        "@type": "Answer",
-                        "text": "Absolutely. You can add your lab logo, adjust margins, and customize reference ranges for all 200+ test templates to match your brand identity."
-                    }
-                },
-                {
-                    "@type": "Question",
-                    "name": "Do I need to install any software on my computer?",
-                    "acceptedAnswer": {
-                        "@type": "Answer",
-                        "text": "No installation is required. CUREBIT is a 100% cloud-based web application. You can access it securely from any device with a modern web browser."
-                    }
-                }
-            ]
+          ]
         }
-    ]
+      ]
+    }
     </script>
 
     <style>
