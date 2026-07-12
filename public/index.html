@@ -40,9 +40,14 @@
     <meta name="twitter:image" content="https://curebit.umbrellainfo.space/black.png">
     <meta name="twitter:url" content="https://curebit.umbrellainfo.space/">
 
-    <!-- Fonts -->
+    <meta name="twitter:url" content="https://curebit.umbrellainfo.space/">
+
+    <!-- Performance & Preconnects -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- JSON-LD Structured Data (Phase 3) -->
@@ -843,13 +848,15 @@
 </head>
 
 <body>
+    <a href="#main-content" class="skip-link" style="position:absolute;top:-40px;left:0;background:#0F766E;color:white;padding:8px 16px;z-index:10000;transition:top 0.2s;" onfocus="this.style.top='0'" onblur="this.style.top='-40px'">Skip to main content</a>
 
     <!-- ░░░░░░░░░ 1. NAVBAR ░░░░░░░░░ -->
-    <nav class="navbar" id="navbar">
-        <div class="container nav-container">
-            <a href="#" class="logo" style="display:flex;align-items:center;" aria-label="CureBIT Home">
-                <img src="black.png" alt="CureBIT Logo" style="height:38px;width:auto;object-fit:contain;display:block;">
-            </a>
+    <header>
+        <nav class="navbar" id="navbar" aria-label="Main Navigation">
+            <div class="container nav-container">
+                <a href="#" class="logo" style="display:flex;align-items:center;" aria-label="CureBIT Home">
+                    <img src="black.png" alt="CureBIT Enterprise Laboratory Software Logo" width="130" height="38" style="height:38px;width:auto;object-fit:contain;display:block;">
+                </a>
             <div class="nav-links">
                 <a href="#features" class="nav-link">Features</a>
                 <a href="#workflow" class="nav-link">Workflow</a>
@@ -861,7 +868,8 @@
                 <a href="app.html?mode=signup" class="btn btn-primary" style="padding:9px 20px;font-size:14px;border-radius:30px;">Get Started Free</a>
             </div>
         </div>
-    </nav>
+        </nav>
+    </header>
     <main id="main-content">
 
     <!-- ░░░░░░░░░ 2. HERO SECTION ░░░░░░░░░ -->
@@ -1281,41 +1289,41 @@
             </div>
 
             <div class="faq-item active">
-                <div class="faq-question" role="button" tabindex="0" onclick="toggleFaq(this)">
+                <div class="faq-question" role="button" tabindex="0" onclick="toggleFaq(this)" aria-expanded="true" aria-controls="faq-answer-1">
                     How does the 7-day free trial work?
                     <span class="faq-chevron">▼</span>
                 </div>
-                <div class="faq-answer">
+                <div class="faq-answer" id="faq-answer-1">
                     You get instant, full access to all features for 7 days upon sign up with no credit card required. After 7 days, you can choose any subscription plan to continue.
                 </div>
             </div>
 
             <div class="faq-item">
-                <div class="faq-question" role="button" tabindex="0" onclick="toggleFaq(this)">
+                <div class="faq-question" role="button" tabindex="0" onclick="toggleFaq(this)" aria-expanded="false" aria-controls="faq-answer-2">
                     Do I need special printers or hardware?
                     <span class="faq-chevron">▼</span>
                 </div>
-                <div class="faq-answer">
+                <div class="faq-answer" id="faq-answer-2">
                     No! CureBIT works on any standard web browser using your existing desktop, laptop, tablet, or smartphone. Reports print on any standard A4 or A5 printer.
                 </div>
             </div>
 
             <div class="faq-item">
-                <div class="faq-question" role="button" tabindex="0" onclick="toggleFaq(this)">
+                <div class="faq-question" role="button" tabindex="0" onclick="toggleFaq(this)" aria-expanded="false" aria-controls="faq-answer-3">
                     Is my patient data secure?
                     <span class="faq-chevron">▼</span>
                 </div>
-                <div class="faq-answer">
+                <div class="faq-answer" id="faq-answer-3">
                     Yes. All patient records are encrypted and stored securely using Firebase Enterprise Cloud Security with 256-bit SSL encryption and automated backups.
                 </div>
             </div>
 
             <div class="faq-item">
-                <div class="faq-question" role="button" tabindex="0" onclick="toggleFaq(this)">
+                <div class="faq-question" role="button" tabindex="0" onclick="toggleFaq(this)" aria-expanded="false" aria-controls="faq-answer-4">
                     Can I add my lab's logo and letterhead header?
                     <span class="faq-chevron">▼</span>
                 </div>
-                <div class="faq-answer">
+                <div class="faq-answer" id="faq-answer-4">
                     Absolutely! You can upload your lab logo, set custom letterhead top margins, add doctor credentials, and upload signature images in Lab Settings.
                 </div>
             </div>

@@ -39,6 +39,11 @@
     <meta name="twitter:image" content="https://curebit.umbrellainfo.space/black.png">
     <meta name="twitter:url" content="https://curebit.umbrellainfo.space/">
 
+    <!-- Performance & Preconnects -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="black.png">
     <link rel="manifest" href="manifest.json">
@@ -75,25 +80,25 @@
     </div>
 
     <!-- Main App (hidden until logged in) -->
-    <div id="app" class="hidden">
+    <main id="app" class="hidden" role="main">
         <!-- Mobile Overlay -->
-        <div id="mobileOverlay" class="mobile-overlay hidden" onclick="toggleMobile()"></div>
+        <div id="mobileOverlay" class="mobile-overlay hidden" onclick="toggleMobile()" aria-label="Close Mobile Menu" role="button" tabindex="0"></div>
 
         <!-- Sidebar -->
         <aside id="sidebar" class="sidebar">
             <div class="sidebar-header">
-                <a href="#" class="brand-container" onclick="showPage('dashboard')">
+                <a href="#" class="brand-container" onclick="showPage('dashboard')" aria-label="Dashboard Home">
                     <div class="logo-wrapper">
-                        <img src="white.png" alt="CureBIT Logo" class="brand-logo">
+                        <img src="white.png" alt="CureBIT Enterprise Laboratory Software Logo" width="130" height="38" class="brand-logo">
                     </div>
                 </a>
             </div>
             <nav class="sidebar-nav" id="sidebarNav"></nav>
             <div class="sidebar-footer">
                 <div id="userInfo" class="user-info"></div>
-                <button onclick="toggleSidebar()" class="collapse-btn">
+                <button onclick="toggleSidebar()" class="collapse-btn" aria-label="Toggle Sidebar">
                     <svg id="collapseIcon" class="collapse-icon" width="20" height="20" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
+                        stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                             d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
                     </svg>
