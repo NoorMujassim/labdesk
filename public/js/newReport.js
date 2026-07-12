@@ -75,7 +75,7 @@ async function renderNewReport(reportData = null) {
             <!-- ░░ STEP PROGRESS BAR ░░ -->
             <div class="nr-progress" style="background:white;border-radius:14px;padding:16px 28px;border:1px solid #e2e8f0;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
                 <div class="nr-progress__track" style="top:32px;"></div>
-                <div class="nr-progress__fill" id="progressFill" style="top:32px;width: 15%;"></div>
+                <div class="nr-progress__fill" id="progressFill" style="top:32px;width: 0%;"></div>
                 
                 <div class="nr-step active" id="step_item_1" onclick="setStep(1)" style="cursor:pointer;">
                     <div class="nr-step__dot">1</div>
@@ -184,7 +184,7 @@ async function renderNewReport(reportData = null) {
             </div>
             
             <div class="nr-action-col nr-action-center">
-                <button onclick="generateAndPreview()" class="nr-generate-btn" id="generateBtn" disabled
+                <button onclick="SubscriptionGuard.run(() => generateAndPreview())" class="nr-generate-btn" id="generateBtn" disabled
                     style="padding:11px 36px;border-radius:10px;font-size:14px;font-weight:800;box-shadow:0 4px 14px rgba(79,70,229,0.3);gap:8px;display:inline-flex;align-items:center;">
                     ${ICONS.check} Generate & Preview Report
                 </button>
@@ -219,7 +219,7 @@ function setStep(step) {
 
     const fill = document.getElementById("progressFill");
     if (fill) {
-        fill.style.width = step === 1 ? "15%" : step === 2 ? "50%" : "100%";
+        fill.style.width = step === 1 ? "0%" : step === 2 ? "50%" : "100%";
     }
 
     for (let i = 1; i <= 3; i++) {
@@ -252,7 +252,7 @@ window.handlePatientSearch = async function (query) {
         resultsEl.innerHTML = `
             <div class="p-4 text-center">
                 <p class="text-xs text-gray-400 mb-3">No patient found matching "${query}"</p>
-                <button onclick="showAddPatientModal()" class="btn btn-primary btn-sm w-full">
+                <button onclick="SubscriptionGuard.run(() => showAddPatientModal())" class="btn btn-primary btn-sm w-full">
                     ${ICONS.plus} Register New Patient
                 </button>
             </div>
@@ -454,12 +454,6 @@ function calculateBilling() {
     const total = Math.max(0, subtotal);
     const totalEl = document.getElementById("billTotalDisplay");
     if (totalEl) totalEl.textContent = `₹${total.toLocaleString()}`;
-
-    const paidInput = document.getElementById("billingPaid");
-    if (paidInput && (paidInput.value === "0" || paidInput.dataset.autoFilled === "true")) {
-        paidInput.value = total;
-        paidInput.dataset.autoFilled = "true";
-    }
 }
 
 async function generateAndPreview() {
@@ -485,9 +479,7 @@ async function saveReport(status, isGenerating = false) {
     const total = parseInt(totalDisplay.replace(/[^\d]/g, ""), 10) || 0;
     const paid = parseInt(document.getElementById("billingPaid").value, 10) || 0;
 
-    if (paid > total) {
-        return showToast(`Paid amount cannot exceed total bill (₹${total})`, "error");
-    }
+
 
     const results = {};
     selectedTemplates.forEach((tName) => {

@@ -245,6 +245,30 @@ async function renderSubscription() {
                     </div>
                 </div>
                 ` : ''}
+                
+                <div style="margin-bottom:32px;text-align:center;">
+                    ${isAdminUser ? `
+                    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);color:white;padding:16px;border-radius:12px;display:inline-block;margin-bottom:20px;box-shadow:0 10px 25px rgba(16, 185, 129, 0.2);">
+                        <div style="font-size:18px;font-weight:800;display:flex;align-items:center;gap:8px;justify-content:center;">
+                            <span>👑</span> Superadmin Lifetime Access Active
+                        </div>
+                        <div style="font-size:13px;opacity:0.9;margin-top:4px;">You have unrestricted access. Pricing plans below are shown for your reference.</div>
+                    </div>` : `
+                    <div style="background:#f1f5f9;display:inline-flex;padding:6px;border-radius:12px;gap:8px;box-shadow:inset 0 2px 4px rgba(0,0,0,0.02);">
+                        <button class="billing-toggle ${!isYearly ? 'active' : ''}" onclick="toggleBilling(this.querySelector('input'))" style="border:none;background:transparent;padding:0;">
+                            <input type="radio" name="billingCycle" value="monthly" ${!isYearly ? 'checked' : ''} style="display:none;">
+                            <div style="padding:8px 24px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;${!isYearly ? 'background:white;color:#0f172a;box-shadow:0 1px 3px rgba(0,0,0,0.1);' : 'color:#64748b;'}">
+                                Monthly
+                            </div>
+                        </button>
+                        <button class="billing-toggle ${isYearly ? 'active' : ''}" onclick="toggleBilling(this.querySelector('input'))" style="border:none;background:transparent;padding:0;">
+                            <input type="radio" name="billingCycle" value="yearly" ${isYearly ? 'checked' : ''} style="display:none;">
+                            <div style="padding:8px 24px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;${isYearly ? 'background:white;color:#0f172a;box-shadow:0 1px 3px rgba(0,0,0,0.1);' : 'color:#64748b;'}">
+                                Yearly <span style="color:#10b981;font-size:11px;margin-left:4px;">(Save 30%)</span>
+                            </div>
+                        </button>
+                    </div>`}
+                </div>
 
                 <!-- Pricing Grid -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-4">
@@ -305,8 +329,12 @@ async function handlePayment(planId) {
         return;
     }
 
+    const billingCycle = (plan.id === 'weekly' || plan.id === 'test')
+        ? 'one_time'
+        : (isYearly ? 'yearly' : 'monthly');
+
     // Calculate final price based on toggle
-    let finalPrice = (plan.id === 'weekly' || plan.id === 'test')
+    let finalPrice = billingCycle === 'one_time'
         ? plan.price
         : (isYearly ? Math.round(plan.price * 12 * 0.70) : plan.price);
 
@@ -317,7 +345,7 @@ async function handlePayment(planId) {
         showToast('Initializing payment order...', 'info');
         
         // 1. Create Razorpay Order via Cloudflare Worker backend
-        const orderData = await WorkerClient.createOrder(plan.id, amountPaise);
+        const orderData = await WorkerClient.createOrder(plan.id, amountPaise, billingCycle);
         const resolvedOrderId = orderData && (orderData.orderId || orderData.id);
         if (!resolvedOrderId) {
             throw new Error('Order creation failed: Backend did not return a valid order ID');
@@ -328,7 +356,7 @@ async function handlePayment(planId) {
             amount: amountPaise,
             currency: "INR",
             name: "CUREBIT",
-            description: `${plan.name} (${plan.id === 'weekly' || plan.id === 'test' ? 'One Time' : (isYearly ? 'Yearly' : 'Monthly')})`,
+            description: `${plan.name} (${billingCycle === 'one_time' ? 'One Time' : (billingCycle === 'yearly' ? 'Yearly' : 'Monthly')})`,
             image: "https://CUREBIT.pages.dev/apple-touch-icon.png",
             order_id: resolvedOrderId,
             handler: async function (response) {
@@ -343,7 +371,7 @@ async function handlePayment(planId) {
                         response.razorpay_signature,
                         plan.id,
                         amountPaise,
-                        isYearly ? 'yearly' : 'monthly'
+                        billingCycle
                     );
 
                     if (!verifyResult || (!verifyResult.success && verifyResult.status !== 'verified')) {

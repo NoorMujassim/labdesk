@@ -1,4 +1,4 @@
-﻿/**
+/**
  * CUREBIT - Lab Settings Page (Firebase/Async)
  */
 
@@ -128,7 +128,7 @@ async function renderSettings() {
 
                 <!-- Actions -->
                 <div class="flex flex-wrap" style="gap:12px;padding-bottom:24px;">
-                    <button onclick="saveSettings()" id="saveSettingsBtn" class="btn btn-primary">
+                    <button onclick="SubscriptionGuard.run(() => saveSettings())" id="saveSettingsBtn" class="btn btn-primary">
                         ${ICONS.check} Save Settings
                     </button>
                     <button onclick="exportData()" class="btn btn-ghost">

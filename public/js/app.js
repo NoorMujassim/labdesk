@@ -31,6 +31,7 @@ const PAGE_TITLES = {
 // ==================== GLOBAL STATE ====================
 let isAdmin = false;
 let isApproved = false;
+let isEmailBypassed = false;
 
 // ==================== AUTH STATE LISTENER ====================
 auth.onAuthStateChanged(async (user) => {
@@ -44,7 +45,7 @@ auth.onAuthStateChanged(async (user) => {
 
 
         // Check if user has an email verification bypass from Super Admin
-        let isEmailBypassed = false;
+        isEmailBypassed = false;
         try {
             const userDoc = await DB.userDoc().get();
             if (userDoc.exists && userDoc.data().emailVerifiedBypass === true) {
@@ -61,57 +62,46 @@ auth.onAuthStateChanged(async (user) => {
             return; // BLOCK access until verification
         }
 
-        if (isAdmin) {
+        // Initialize SubscriptionGuard so dashboard components know the status
+        await SubscriptionGuard.init();
+
+        // Check Subscription Status
+        const hasActiveSubscription = isAdmin ? true : await DB.checkApproval();
+        console.log('Subscription Active:', hasActiveSubscription);
+
+        if (hasActiveSubscription || isEmailBypassed) {
             document.getElementById('authScreen').classList.add('hidden');
             document.getElementById('app').classList.remove('hidden');
             renderSidebar();
             renderUserInfo(user);
             await updateLabNameHeader();
             showPage('dashboard');
-        } else {
-            // Check Subscription Status
-            const hasActiveSubscription = await DB.checkApproval();
-            console.log('Subscription Active:', hasActiveSubscription);
 
-            if (hasActiveSubscription) {
-                document.getElementById('authScreen').classList.add('hidden');
-                document.getElementById('app').classList.remove('hidden');
-                renderSidebar();
-                renderUserInfo(user);
-                await updateLabNameHeader();
-                showPage('dashboard');
-
-                if (sessionStorage.getItem('paymentSuccess') === 'true') {
-                    sessionStorage.removeItem('paymentSuccess');
-                    showToast('Payment Captured! Plan Activated 🚀', 'success');
-                }
-
-                // Show email verification reminder if not verified (though verification is now strict)
-                if (!user.emailVerified) {
-                    showToast('📧 Please verify your email to secure your account!', 'warning');
-                }
-            } else {
-                // No active subscription -> Force Subscription Page
-                document.getElementById('authScreen').classList.add('hidden');
-                document.getElementById('app').classList.remove('hidden');
-
-                // Render limited sidebar (only Logout) or just hide interactions
-                renderSidebar();
-                renderUserInfo(user);
-                await updateLabNameHeader();
-
-                showPage('subscription');
-                showToast('Active subscription required. Please upgrade to continue.', 'error');
-
-                // Disable navigation to other pages
-                document.querySelectorAll('.nav-btn').forEach(btn => {
-                    if (btn.dataset.page !== 'subscription') {
-                        btn.disabled = true;
-                        btn.style.opacity = '0.5';
-                        btn.style.cursor = 'not-allowed';
-                    }
-                });
+            if (sessionStorage.getItem('paymentSuccess') === 'true') {
+                sessionStorage.removeItem('paymentSuccess');
+                showToast('Payment Captured! Plan Activated 🚀', 'success');
             }
+        } else {
+            // No active subscription -> Force Subscription Page
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+
+            // Render limited sidebar (only Logout) or just hide interactions
+            renderSidebar();
+            renderUserInfo(user);
+            await updateLabNameHeader();
+
+            showPage('subscription');
+            showToast('Active subscription required. Please upgrade to continue.', 'error');
+
+            // Disable navigation to other pages
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.dataset.page !== 'subscription') {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                    btn.style.cursor = 'not-allowed';
+                }
+            });
         }
 
         analytics.logEvent('login', { method: user.providerData[0]?.providerId || 'email' });
@@ -173,6 +163,16 @@ function showPage(page) {
     // 2. Global State Reset
     currentPage = page;
     editingReportId = null;
+
+    // STRICT PAYMENT ENFORCEMENT
+    if (!isAdmin && !isEmailBypassed && window.SubscriptionGuard && !SubscriptionGuard.isActive()) {
+        const allowedPages = ['subscription', 'profile'];
+        if (!allowedPages.includes(page)) {
+            page = 'subscription';
+            currentPage = page;
+            showToast('You must activate a subscription plan to access the dashboard.', 'warning');
+        }
+    }
 
     // 3. Update nav active state
     document.querySelectorAll('.nav-btn').forEach(btn => {

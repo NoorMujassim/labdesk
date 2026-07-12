@@ -46,8 +46,22 @@ async function renderDashboard() {
         }
 
         /* ── Subscription KPI ─────────────────────────────────────── */
+        const isSuperAdmin = await DB.checkIfAdmin();
         let subscriptionWidget = '';
-        if (labProfile && labProfile.planStatus === 'active' && labProfile.planValidUntil) {
+        
+        if (isSuperAdmin) {
+            const subIcon = `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>`;
+            subscriptionWidget = kpiCard({
+                label: 'Active Subscription',
+                value: 'Lifetime',
+                sub: 'Superadmin Access',
+                subValue: 'Unlimited',
+                iconHtml: subIcon,
+                iconBg: '#f0fdf4',
+                iconColor: '#16a34a',
+                accentColor: '#22c55e'
+            });
+        } else if (labProfile && labProfile.planStatus === 'active' && labProfile.planValidUntil) {
             const validUntilDate = labProfile.planValidUntil.toDate ? labProfile.planValidUntil.toDate() : new Date(labProfile.planValidUntil);
             const remainingDays = Math.max(0, Math.ceil((validUntilDate - new Date()) / (1000 * 60 * 60 * 24)));
             
@@ -179,6 +193,22 @@ async function renderDashboard() {
         /* ── Render ────────────────────────────────────────────────── */
         container.innerHTML = `
         <div class="fade-in" style="max-width:1600px;width:100%;margin:0 auto;">
+
+            ${!SubscriptionGuard.isActive() ? `
+            <!-- ░░ EXPIRATION BANNER ░░ -->
+            <div style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);color:white;border-radius:12px;padding:16px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 10px 15px -3px rgba(220,38,38,0.3);">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="background:rgba(255,255,255,0.2);padding:8px;border-radius:50%;display:flex;">
+                        <svg width="24" height="24" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    </div>
+                    <div>
+                        <h4 style="margin:0;font-size:16px;font-weight:700;">Subscription Expired</h4>
+                        <p style="margin:4px 0 0 0;font-size:13px;opacity:0.9;">You currently have view-only access. Renew your plan to unlock all features.</p>
+                    </div>
+                </div>
+                <button class="btn" style="background:white;color:#dc2626;border:none;font-weight:700;padding:8px 20px;border-radius:8px;" onclick="showPage('subscription')">Renew Now</button>
+            </div>
+            ` : ''}
 
             <!-- ░░ HEADER BANNER ░░ -->
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;

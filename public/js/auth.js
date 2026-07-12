@@ -830,7 +830,10 @@ async function renderAdminPanel() {
                                             <td class="text-gray-500 text-xs">${u.email || '—'}</td>
                                             <td><span class="text-xs text-gray-400" style="font-family:monospace;">${u.id.slice(0, 16)}...</span></td>
                                             <td class="text-xs text-gray-400">${u.approvedAt ? new Date(u.approvedAt.seconds * 1000).toLocaleDateString() : '—'}</td>
-                                            <td>
+                                            <td style="display:flex;gap:8px;align-items:center;">
+                                                <button onclick="adminSendPasswordReset('${u.email}')" class="btn btn-outline btn-xs" style="border:none;background:#f8fafc;color:#475569;display:inline-flex;align-items:center;gap:4px;" title="Reset Password">
+                                                    🔑 Reset
+                                                </button>
                                                     <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
                                                     Revoke
                                                 </button>
@@ -874,11 +877,88 @@ async function adminRejectUser(userId) {
     }
 }
 
+function adminSendPasswordReset(email) {
+    if (document.getElementById('resetPwdModal')) {
+        document.getElementById('resetPwdModal').remove();
+    }
+    
+    const modalHtml = `
+        <div id="resetPwdModal" class="modal-overlay" style="display:flex;z-index:9999;align-items:center;justify-content:center;">
+            <div class="modal-content modal-sm" style="background:white;border-radius:12px;width:100%;max-width:400px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1);">
+                <div class="modal-header" style="padding:16px 20px;border-bottom:1px solid #e2e8f0;">
+                    <h3 class="modal-title" style="margin:0;font-size:18px;font-weight:700;color:#1e293b;">Reset User Password</h3>
+                </div>
+                <div class="modal-body" style="padding:20px;">
+                    <p style="font-size:14px;color:#475569;margin:0;">A secure Firebase password reset email will be sent to:</p>
+                    <p style="font-weight:600;margin-top:12px;font-size:15px;color:#0f172a;background:#f8fafc;padding:10px;border-radius:6px;border:1px solid #e2e8f0;">${email}</p>
+                </div>
+                <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:12px;padding:16px 20px;border-top:1px solid #e2e8f0;background:#f8fafc;border-bottom-left-radius:12px;border-bottom-right-radius:12px;">
+                    <button class="btn btn-outline" onclick="document.getElementById('resetPwdModal').remove()" style="padding:8px 16px;">Cancel</button>
+                    <button class="btn btn-primary" onclick="confirmSendPasswordReset('${email}')" style="padding:8px 16px;display:flex;align-items:center;gap:6px;">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        Send Reset Link
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+async function confirmSendPasswordReset(email) {
+    const modal = document.getElementById('resetPwdModal');
+    const btn = modal.querySelector('.btn-primary');
+    const originalText = btn.innerHTML;
+    
+    try {
+        btn.innerHTML = '<div class="loader-spinner" style="width:16px;height:16px;border-width:2px;border-top-color:white;"></div> Sending...';
+        btn.disabled = true;
+        
+        await firebase.auth().sendPasswordResetEmail(email);
+        
+        showToast('✅ Password reset email sent successfully.', 'success');
+        modal.remove();
+        
+        // Audit log mention: Audit logging can be added in a future version.
+    } catch (error) {
+        console.error('Password reset error:', error);
+        
+        let errorMsg = 'Failed to send reset email.';
+        if (error.code === 'auth/user-not-found') {
+            errorMsg = 'User not found in authentication system.';
+        } else if (error.code === 'auth/invalid-email') {
+            errorMsg = 'Invalid email address format.';
+        } else if (error.code === 'auth/too-many-requests') {
+            errorMsg = 'Too many requests. Please try again later.';
+        }
+        
+        showToast(errorMsg, 'error');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
 async function adminRevokeUser(userId, name) {
     if (!confirm('Revoke access for "' + name + '"? They will no longer be able to use CUREBIT.')) return;
     try {
         await DB.revokeUser(userId);
-        showToast('User access revoked');
+        
+        const currentAdmin = auth.currentUser;
+        const isSuperAdmin = currentAdmin && currentAdmin.email === 'noormujassimraza@gmail.com';
+        
+        if (isSuperAdmin && window.WorkerClient) {
+            try {
+                await WorkerClient.adminDeleteUser(userId);
+                showToast('User completely deleted from Firebase');
+            } catch (err) {
+                console.error("Firebase Auth deletion failed:", err);
+                showToast('Revoked from DB, but failed to delete from Auth', 'warning');
+            }
+        } else {
+            showToast('User access revoked');
+        }
+        
         renderAdminPanel();
     } catch (e) {
         showToast('Error: ' + e.message, 'error');
@@ -1048,6 +1128,9 @@ async function handleCreateUser() {
                 await firestore.collection('users').doc(newUserId).set({
                     emailVerifiedBypass: true
                 }, { merge: true });
+                
+                // Grant lifetime premium access (100 years) so the user has "sare access"
+                await DB.grantFreeSubscription(newUserId, 1200);
             }
         }
 

@@ -37,6 +37,15 @@ const DB = {
         Object.keys(this.cache).forEach(key => this.clearCache(key));
     },
 
+    normalizeLabName(value, fallback = null) {
+        const authName = firebase.auth().currentUser?.displayName || '';
+        const defaultFallback = fallback || authName || 'Registered Lab';
+        const name = String(value || '').trim();
+        const normalized = name.toUpperCase();
+        if (!name || normalized === 'MY LAB' || normalized === 'LABDESK') return defaultFallback;
+        return name;
+    },
+
     // Set user context
     async setUser(uid) {
         this.clearAllCaches();
@@ -89,18 +98,26 @@ const DB = {
         return record;
     },
     assertTenantAssets(profile) {
-        const root = `curebit/labs/${this.assertTenantSession()}/`;
+        if (this.isAdmin === true) return true; // Bypass security assertion for global system admin
+        
+        const root = `curebit/labs/${this.assertTenantSession()}/`.toLowerCase();
         const refs = [
             profile.logoPublicId,
             profile.doctorSignaturePublicId,
             profile.pathologistSignaturePublicId,
             profile.profilePhotoPublicId
         ].filter(Boolean);
+        
         if (refs.some(ref => !String(ref).toLowerCase().startsWith(root))) {
+            const badRef = refs.find(ref => !String(ref).toLowerCase().startsWith(root));
+            console.error('Blocked Asset Ref:', badRef, 'Root:', root);
             throw new Error('SECURITY ERROR: Cross-tenant asset blocked');
         }
+        
         const urls = [profile.logo, profile.doctorSignatureUrl, profile.pathologistSignatureUrl].filter(Boolean);
         if (urls.some(url => !decodeURIComponent(String(url)).toLowerCase().includes(`/${root}`))) {
+            const badUrl = urls.find(url => !decodeURIComponent(String(url)).toLowerCase().includes(`/${root}`));
+            console.error('Blocked Asset URL:', badUrl, 'Root:', root);
             throw new Error('SECURITY ERROR: Unverified tenant asset URL blocked');
         }
         return true;
@@ -348,7 +365,7 @@ const DB = {
             this.assertTenantRecord(data, 'lab settings');
             return {
                 labId: data.labId,
-                labName: data.labName || 'CureBIT Pathology Lab',
+                labName: this.normalizeLabName(data.labName, data.ownerName || firebase.auth().currentUser?.displayName || ''),
                 address: data.address || '',
                 phone: data.phone || '',
                 email: data.email || '',
@@ -373,7 +390,7 @@ const DB = {
             console.error('getLabProfile error:', e);
             if (String(e.message || e).includes('SECURITY ERROR')) throw e;
             return {
-                labName: 'My Lab', address: '', phone: '', email: '',
+                labName: this.normalizeLabName('', ''), address: '', phone: '', email: '',
                 regNo: '', logo: '', doctorName: '', doctorQualification: '',
                 pathologistName: '', pathologistDegree: '', techName: '', techDegree: '',
                 ownerName: '', signatureText: '', headerColor: '#1e40af'

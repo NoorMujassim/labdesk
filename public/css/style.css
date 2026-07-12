@@ -2812,8 +2812,8 @@ input[type="number"]::-webkit-inner-spin-button {
 
 /* Step Indicator (Progress Bar) */
 .nr-progress {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: center;
     position: relative;
     margin-bottom: 4px;
@@ -2822,6 +2822,10 @@ input[type="number"]::-webkit-inner-spin-button {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-light);
+    overflow: hidden;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .nr-progress__track {
@@ -2844,6 +2848,7 @@ input[type="number"]::-webkit-inner-spin-button {
     z-index: 0;
     border-radius: 2px;
     transition: width 0.3s ease;
+    max-width: calc(100% - 80px);
 }
 
 .nr-step {
@@ -2855,6 +2860,8 @@ input[type="number"]::-webkit-inner-spin-button {
     gap: 4px;
     background: white;
     padding: 0 12px;
+    min-width: 0;
+    text-align: center;
 }
 
 .nr-step__dot {
@@ -2876,6 +2883,9 @@ input[type="number"]::-webkit-inner-spin-button {
     font-size: 13px;
     font-weight: 600;
     color: var(--text-muted);
+    max-width: 100%;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
 }
 
 .nr-step.active .nr-step__dot {
@@ -2894,6 +2904,31 @@ input[type="number"]::-webkit-inner-spin-button {
 .nr-step.active .nr-step__label,
 .nr-step.completed .nr-step__label {
     color: var(--text-main);
+}
+
+@media (max-width: 720px) {
+    .nr-progress {
+        padding: 14px 10px;
+        gap: 4px;
+    }
+
+    .nr-progress__track {
+        left: 30px;
+        right: 30px;
+    }
+
+    .nr-progress__fill {
+        left: 30px;
+        max-width: calc(100% - 60px);
+    }
+
+    .nr-step {
+        padding: 0 4px;
+    }
+
+    .nr-step__label {
+        font-size: 11px;
+    }
 }
 
 /* Forms */

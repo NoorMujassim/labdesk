@@ -4,6 +4,8 @@
  *  - RS256 Cryptographic JWT Verification (Google Firebase Auth Public Keys)
  *  - Sliding Window Rate Limiting (IP & UID)
  *  - Constant-Time HMAC Signature Comparison (Timing Attack Protection)
+ *  - Sliding Window Rate Limiting (IP & UID)
+ *  - Constant-Time HMAC Signature Comparison (Timing Attack Protection)
  *  - Webhook Idempotency & Replay Protection
  *  - Strict Whitelisted CORS Domain Locks
  *  - Enterprise OWASP Security Response Headers
@@ -12,6 +14,8 @@
 // Whitelisted CORS Origins
 const ALLOWED_ORIGINS = [
     'https://curebit.pages.dev',
+    'https://curebit-app.pages.dev',
+    'https://curebit.umbrellainfo.space',
     'http://localhost:5173',
     'http://127.0.0.1:5173',
     'http://localhost:8080',
@@ -240,6 +244,7 @@ async function verifyFirebaseIdToken(authHeader, projectId) {
 }
 
 const PAYMENT_PLANS = Object.freeze({
+    test: { id: 'test', name: 'Testing Plan', tier: 'test', monthlyPaise: 100, durationDays: 1, billingCycles: ['one_time'] },
     weekly: { id: 'weekly', name: 'Weekly Pass', tier: 'weekly', monthlyPaise: 7900, durationDays: 7, billingCycles: ['one_time'] },
     starter: { id: 'starter', name: 'Starter', tier: 'starter', monthlyPaise: 19900, durationDays: 30, billingCycles: ['monthly', 'yearly'] },
     standard: { id: 'standard', name: 'Standard', tier: 'standard', monthlyPaise: 39900, durationDays: 30, billingCycles: ['monthly', 'yearly'] },
@@ -248,8 +253,35 @@ const PAYMENT_PLANS = Object.freeze({
 });
 
 function resolvePlan(planId, billingCycle) {
+    const availablePlans = Object.fromEntries(
+        Object.entries(PAYMENT_PLANS).map(([key, plan]) => [
+            key,
+            {
+                id: plan.id,
+                name: plan.name,
+                tier: plan.tier,
+                monthlyPaise: plan.monthlyPaise,
+                durationDays: plan.durationDays,
+                billingCycles: plan.billingCycles
+            }
+        ])
+    );
     const plan = PAYMENT_PLANS[planId];
-    if (!plan || !plan.billingCycles.includes(billingCycle)) return null;
+    const rejectionReason = !plan
+        ? 'planId not found in PAYMENT_PLANS'
+        : (!plan.billingCycles.includes(billingCycle)
+            ? `billingCycle "${billingCycle}" not allowed for plan "${planId}"`
+            : null);
+
+    console.log('resolvePlan audit:', {
+        planIdReceived: planId,
+        billingCycleReceived: billingCycle,
+        availablePaymentPlans: availablePlans,
+        matchedPlan: plan || null,
+        rejectionReason
+    });
+
+    if (rejectionReason) return null;
     const amountPaise = billingCycle === 'yearly'
         ? Math.round((plan.monthlyPaise / 100) * 12 * 0.70) * 100
         : plan.monthlyPaise;
@@ -290,7 +322,7 @@ async function getFirestoreAccessToken(env) {
         .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     const claims = btoa(JSON.stringify({
         iss: env.FIREBASE_CLIENT_EMAIL,
-        scope: 'https://www.googleapis.com/auth/datastore',
+        scope: 'https://www.googleapis.com/auth/datastore https://www.googleapis.com/auth/identitytoolkit',
         aud: 'https://oauth2.googleapis.com/token',
         iat: nowSeconds,
         exp: nowSeconds + 3600
@@ -388,6 +420,59 @@ async function recordWebhookEvent(env, eventId, eventType) {
         },
         currentDocument: { exists: false }
     }]);
+}
+
+async function getRazorpayOrder(keyId, keySecret, orderId) {
+    const response = await fetch(`https://api.razorpay.com/v1/orders/${encodeURIComponent(orderId)}`, {
+        headers: { 'Authorization': `Basic ${btoa(`${keyId}:${keySecret}`)}` }
+    });
+    if (!response.ok) throw new Error(`Razorpay order lookup failed (${response.status})`);
+    return response.json();
+}
+
+async function getRazorpayPayment(keyId, keySecret, paymentId) {
+    const response = await fetch(`https://api.razorpay.com/v1/payments/${encodeURIComponent(paymentId)}`, {
+        headers: { 'Authorization': `Basic ${btoa(`${keyId}:${keySecret}`)}` }
+    });
+    if (!response.ok) throw new Error(`Razorpay payment lookup failed (${response.status})`);
+    return response.json();
+}
+
+async function listRecentRazorpayPayments(keyId, keySecret) {
+    const response = await fetch('https://api.razorpay.com/v1/payments?count=100&skip=0', {
+        headers: { 'Authorization': `Basic ${btoa(`${keyId}:${keySecret}`)}` }
+    });
+    if (!response.ok) throw new Error(`Razorpay payment list failed (${response.status})`);
+    const data = await response.json();
+    return Array.isArray(data.items) ? data.items : [];
+}
+
+async function findRecoverablePayment(keyId, keySecret, userContext, plan, paymentId) {
+    const candidatePayments = paymentId
+        ? [await getRazorpayPayment(keyId, keySecret, paymentId)]
+        : await listRecentRazorpayPayments(keyId, keySecret);
+    const userEmail = String(userContext.email || '').toLowerCase();
+    const cutoffSeconds = Math.floor(Date.now() / 1000) - (14 * 24 * 60 * 60);
+
+    for (const payment of candidatePayments) {
+        if (!payment || payment.status !== 'captured') continue;
+        if (payment.amount !== plan.amountPaise) continue;
+        if (payment.created_at && payment.created_at < cutoffSeconds) continue;
+        if (String(payment.email || '').toLowerCase() !== userEmail) continue;
+        if (!payment.order_id) continue;
+
+        const order = await getRazorpayOrder(keyId, keySecret, payment.order_id);
+        const notes = order.notes || {};
+        const orderPlanId = notes.planId || notes.plan_id;
+        const orderBillingCycle = notes.billingCycle || notes.billing_cycle || plan.billingCycle;
+
+        if (orderPlanId !== plan.id) continue;
+        if (orderBillingCycle !== plan.billingCycle) continue;
+
+        return { payment, order };
+    }
+
+    return null;
 }
 
 async function activateVerifiedPayment(env, userContext, payment, order, plan) {
@@ -562,10 +647,91 @@ export default {
         }
 
         // 5. Razorpay Create Order Endpoint (POST /api/razorpay/create-order)
+        if (path === '/api/razorpay/recover-payment' && request.method === 'POST') {
+            try {
+                const body = await request.json();
+                const planId = body.planId || 'weekly';
+                const billingCycle = body.billingCycle || ((planId === 'weekly' || planId === 'test') ? 'one_time' : 'monthly');
+                const paymentId = body.paymentId || null;
+
+                if (paymentId && !isIdentifier(paymentId, 'pay_')) {
+                    return jsonResponse({ error: 'Invalid payment id' }, 400, request);
+                }
+
+                const plan = resolvePlan(planId, billingCycle);
+                if (!plan) {
+                    return jsonResponse({ error: 'Invalid plan specified' }, 400, request);
+                }
+
+                const recovered = await findRecoverablePayment(
+                    razorpayKeyId,
+                    razorpayKeySecret,
+                    userContext,
+                    plan,
+                    paymentId
+                );
+
+                if (!recovered) {
+                    return jsonResponse({ error: 'No recoverable captured payment found' }, 404, request);
+                }
+
+                await activateVerifiedPayment(env, userContext, {
+                    id: recovered.payment.id,
+                    amount: recovered.payment.amount,
+                    currency: recovered.payment.currency || 'INR',
+                    status: recovered.payment.status
+                }, {
+                    id: recovered.order.id || recovered.payment.order_id
+                }, plan);
+
+                console.log('Recovered captured Razorpay payment:', {
+                    userId: userContext.uid,
+                    email: userContext.email,
+                    paymentId: recovered.payment.id,
+                    orderId: recovered.order.id || recovered.payment.order_id,
+                    planId: plan.id,
+                    billingCycle: plan.billingCycle
+                });
+
+                return jsonResponse({
+                    success: true,
+                    status: 'recovered',
+                    paymentId: recovered.payment.id,
+                    orderId: recovered.order.id || recovered.payment.order_id,
+                    planId: plan.id,
+                    billingCycle: plan.billingCycle,
+                    userId: userContext.uid
+                }, 200, request);
+
+            } catch (e) {
+                console.error('Recover Payment Error:', e);
+                return jsonResponse({ error: 'Payment Recovery Failed' }, 500, request);
+            }
+        }
+
+        // 5. Razorpay Create Order Endpoint (POST /api/razorpay/create-order)
         if (path === '/api/razorpay/create-order' && request.method === 'POST') {
             try {
                 const body = await request.json();
-                const amountPaise = body.amountPaise || (body.amount ? body.amount * 100 : 39900);
+                const planId = body.planId || 'standard';
+                const billingCycle = body.billingCycle || 'monthly';
+                const plan = resolvePlan(planId, billingCycle);
+                if (!plan) {
+                    return jsonResponse({ error: 'Invalid plan specified' }, 400, request);
+                }
+
+                const requestedAmountPaise = body.amountPaise || (body.amount ? body.amount * 100 : plan.amountPaise);
+                if (requestedAmountPaise !== plan.amountPaise) {
+                    console.error('Create Order Plan Amount Mismatch:', {
+                        planIdReceived: planId,
+                        billingCycleReceived: billingCycle,
+                        requestedAmountPaise,
+                        resolvedAmountPaise: plan.amountPaise
+                    });
+                    return jsonResponse({ error: 'Invalid plan amount' }, 400, request);
+                }
+
+                const amountPaise = plan.amountPaise;
                 const currency = body.currency || 'INR';
                 const receipt = body.receipt || `rec_${Date.now()}`;
 
@@ -584,7 +750,8 @@ export default {
                         notes: {
                             userId: userContext.uid,
                             email: userContext.email,
-                            planId: body.planId || 'standard'
+                            planId: plan.id,
+                            billingCycle: plan.billingCycle
                         }
                     })
                 });
@@ -603,7 +770,9 @@ export default {
                     id: orderData.id,
                     orderId: orderData.id,
                     amount: orderData.amount,
-                    currency: orderData.currency
+                    currency: orderData.currency,
+                    planId: plan.id,
+                    billingCycle: plan.billingCycle
                 }, 200, request);
 
             } catch (e) {
@@ -635,10 +804,19 @@ export default {
                 if (!plan) {
                     return jsonResponse({ error: 'Invalid plan specified' }, 400, request);
                 }
+                if (amountPaise !== plan.amountPaise) {
+                    console.error('Verify Payment Plan Amount Mismatch:', {
+                        planIdReceived: planId,
+                        billingCycleReceived: billingCycle || 'monthly',
+                        receivedAmountPaise: amountPaise,
+                        resolvedAmountPaise: plan.amountPaise
+                    });
+                    return jsonResponse({ error: 'Invalid plan amount' }, 400, request);
+                }
 
                 const paymentObj = {
                     id: paymentId,
-                    amount: amountPaise,
+                    amount: plan.amountPaise,
                     currency: 'INR',
                     status: 'captured'
                 };
@@ -659,6 +837,47 @@ export default {
             } catch (e) {
                 console.error('Verify Payment Error:', e);
                 return jsonResponse({ error: 'Verification Failed' }, 500, request);
+            }
+        }
+        // 7. Secure Admin Endpoint: Delete User from Firebase Auth
+        if (path === '/api/admin/delete-user' && request.method === 'DELETE') {
+            try {
+                // Ensure the caller is the Superadmin
+                if (userContext.email !== 'noormujassimraza@gmail.com') {
+                    console.warn('⚠️ Security Violation: Unauthorized Firebase Auth deletion attempt by:', userContext.email);
+                    return jsonResponse({ error: 'Forbidden' }, 403, request);
+                }
+
+                const body = await request.json();
+                const targetUid = body.uid;
+                if (!targetUid) {
+                    return jsonResponse({ error: 'Target UID is required' }, 400, request);
+                }
+
+                const serviceToken = await getServiceAccessToken(env);
+                
+                // Call Google Identity Toolkit REST API
+                const idToolkitUrl = `https://identitytoolkit.googleapis.com/v1/projects/${firebaseProjectId}/accounts:delete`;
+                const deleteRes = await fetch(idToolkitUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${serviceToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ localId: targetUid })
+                });
+
+                if (!deleteRes.ok) {
+                    const errBody = await deleteRes.text();
+                    console.error('Firebase Auth Deletion Failed:', errBody);
+                    throw new Error('Identity Toolkit deletion failed');
+                }
+
+                return jsonResponse({ success: true, message: 'User completely eradicated from Firebase Auth' }, 200, request);
+
+            } catch (e) {
+                console.error('Admin Delete User Error:', e);
+                return jsonResponse({ error: 'Deletion Failed' }, 500, request);
             }
         }
 

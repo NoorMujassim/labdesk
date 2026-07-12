@@ -83,17 +83,17 @@ async function renderPatients() {
                 <!-- Actions -->
                 <td style="padding:14px 20px;text-align:right;">
                     <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;">
-                        <button onclick="createReportForPatient('${p.id}')" title="Create New Report"
+                        <button onclick="SubscriptionGuard.run(() => createReportForPatient('${p.id}'))" title="Create New Report"
                             style="padding:6px 12px;border-radius:8px;border:none;background:#4f46e5;color:white;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:5px;cursor:pointer;box-shadow:0 1px 3px rgba(79,70,229,0.25);transition:all 0.15s;"
                             onmouseover="this.style.background='#4338ca';" onmouseout="this.style.background='#4f46e5';">
                             ${plusSvg} Report
                         </button>
-                        <button onclick="editPatient('${p.id}')" title="Edit Patient Details"
+                        <button onclick="SubscriptionGuard.run(() => editPatient('${p.id}'))" title="Edit Patient Details"
                             style="width:32px;height:32px;border-radius:8px;border:1.5px solid #e2e8f0;background:white;color:#475569;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;"
                             onmouseover="this.style.borderColor='#94a3b8';this.style.color='#0f172a';this.style.background='#f8fafc';" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#475569';this.style.background='white';">
                             ${ICONS.edit}
                         </button>
-                        <button onclick="deletePatient('${p.id}')" title="Delete Patient Record"
+                        <button onclick="SubscriptionGuard.run(() => deletePatient('${p.id}'))" title="Delete Patient Record"
                             style="width:32px;height:32px;border-radius:8px;border:1.5px solid #e2e8f0;background:white;color:#94a3b8;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;"
                             onmouseover="this.style.borderColor='#fca5a5';this.style.color='#ef4444';this.style.background='#fee2e2';" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#94a3b8';this.style.background='white';">
                             ${ICONS.delete}
@@ -110,7 +110,7 @@ async function renderPatients() {
                 </div>
                 <h3 style="font-size:16px;font-weight:800;color:#0f172a;margin:0 0 6px;">No patients registered yet</h3>
                 <p style="font-size:13px;color:#64748b;margin:0 0 20px;max-width:320px;margin-left:auto;margin-right:auto;">Register your first patient to manage diagnostic history and test reports.</p>
-                <button onclick="showAddPatientModal()" class="btn btn-primary" style="padding:10px 22px;font-size:13px;border-radius:10px;gap:6px;">
+                <button onclick="SubscriptionGuard.run(() => showAddPatientModal())" class="btn btn-primary" style="padding:10px 22px;font-size:13px;border-radius:10px;gap:6px;">
                     ${plusSvg} Register Patient
                 </button>
             </div>`;
@@ -136,7 +136,7 @@ async function renderPatients() {
                 </div>
 
                 <div style="display:flex;align-items:center;gap:12px;">
-                    <button onclick="showAddPatientModal()" class="btn btn-primary" style="padding:10px 22px;font-size:13px;border-radius:10px;gap:8px;box-shadow:0 4px 12px rgba(79,70,229,0.25);">
+                    <button onclick="SubscriptionGuard.run(() => showAddPatientModal())" class="btn btn-primary" style="padding:10px 22px;font-size:13px;border-radius:10px;gap:8px;box-shadow:0 4px 12px rgba(79,70,229,0.25);">
                         ${plusSvg} Add New Patient
                     </button>
                 </div>

@@ -1,17 +1,16 @@
-﻿# CUREBIT - Robots.txt
-# https://CUREBIT.pages.dev
+# CUREBIT - Robots.txt
+# https://curebit.umbrellainfo.space
 
 User-agent: *
 Allow: /
-Allow: /app.html
-Allow: /sitemap.xml
-
-# Block internal app routes from crawling
+Disallow: /app.html
+Disallow: /api/
+Disallow: /admin/
 Disallow: /js/
 Disallow: /css/
 
 # Sitemap location
-Sitemap: https://CUREBIT.pages.dev/sitemap.xml
+Sitemap: https://curebit.umbrellainfo.space/sitemap.xml
 
 # Google specific
 User-agent: Googlebot
@@ -27,5 +26,3 @@ Crawl-delay: 2
 User-agent: Yandex
 Allow: /
 Crawl-delay: 3
-
-

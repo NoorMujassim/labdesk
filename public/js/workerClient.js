@@ -59,10 +59,10 @@ const WorkerClient = {
     /**
      * Create Razorpay Order via Cloudflare Worker
      */
-    async createOrder(planId, amountPaise) {
+    async createOrder(planId, amountPaise, billingCycle) {
         return await this.request('/api/razorpay/create-order', {
             method: 'POST',
-            body: JSON.stringify({ planId, amountPaise })
+            body: JSON.stringify({ planId, amountPaise, billingCycle })
         });
     },
 
@@ -70,10 +70,29 @@ const WorkerClient = {
      * Verify Razorpay Payment Signature via Cloudflare Worker
      */
     async verifyPaymentSignature(orderId, paymentId, signature, planId, amountPaise, billingCycle) {
-        console.log('Sending verifyPaymentSignature:', { orderId, paymentId, signature, planId, amountPaise, billingCycle });
         return await this.request('/api/razorpay/verify-payment', {
             method: 'POST',
             body: JSON.stringify({ orderId, paymentId, signature, planId, amountPaise, billingCycle })
+        });
+    },
+
+    /**
+     * Recover a captured Razorpay payment that was not activated
+     */
+    async recoverPayment(planId, billingCycle, paymentId) {
+        return await this.request('/api/razorpay/recover-payment', {
+            method: 'POST',
+            body: JSON.stringify({ planId, billingCycle, paymentId })
+        });
+    },
+
+    /**
+     * Delete a Firebase Auth user completely (Superadmin only)
+     */
+    async adminDeleteUser(uid) {
+        return await this.request('/api/admin/delete-user', {
+            method: 'DELETE',
+            body: JSON.stringify({ uid })
         });
     }
 };

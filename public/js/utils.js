@@ -365,7 +365,7 @@ function getReportHTML(report, patient, lab) {
             <div style="font-size:10px;color:#475569;margin-top:2px;">${s.qual}</div>
         </td>`).join('');
 
-    const rawLabName = lab.labName || '';
+    const rawLabName = DB.normalizeLabName ? DB.normalizeLabName(lab.labName) : (lab.labName || auth.currentUser?.displayName || 'Registered Lab');
 
     /* ── FULL REPORT ────────────────────────────────────────────── */
     return `
@@ -693,10 +693,7 @@ async function handlePrintReceipt(id) {
         const patient = await DB.getPatientById(report.patientId);
         const lab     = await DB.getLabProfile();
         
-        let rawLabName = lab.labName || 'CureBIT Pathology Lab';
-        if (!rawLabName || rawLabName.toUpperCase() === 'LABDESK' || rawLabName.toUpperCase() === 'MY LAB') {
-            rawLabName = 'CureBIT Pathology Lab';
-        }
+        const rawLabName = DB.normalizeLabName ? DB.normalizeLabName(lab.labName) : (lab.labName || auth.currentUser?.displayName || 'Registered Lab');
 
         const hc         = lab.headerColor || '#1a3a8a';
         const receiptNo  = 'REC-' + (report.id ? report.id.slice(0, 8).toUpperCase() : '0001');
@@ -945,3 +942,68 @@ function importData(e) {
     reader.readAsText(file);
 }
 
+// ==================== SUBSCRIPTION GUARD ====================
+const SubscriptionGuard = {
+    cachedStatus: null,
+    
+    async init() {
+        try {
+            if (await DB.checkIfAdmin()) {
+                this.cachedStatus = true;
+                return;
+            }
+            const sub = await DB.getSubscription();
+            this.cachedStatus = sub && sub.status === 'active' && sub.validUntil && new Date(sub.validUntil.toDate()) > new Date();
+        } catch(e) {
+            this.cachedStatus = false;
+        }
+    },
+    
+    isActive() {
+        return this.cachedStatus === true;
+    },
+    
+    showLockedModal() {
+        if (document.getElementById('subscriptionLockedModal')) {
+            document.getElementById('subscriptionLockedModal').remove();
+        }
+        
+        const modalHtml = `
+            <div id="subscriptionLockedModal" class="modal-overlay" style="display:flex;z-index:9999;align-items:center;justify-content:center;">
+                <div class="modal-content modal-sm" style="background:white;border-radius:16px;width:100%;max-width:420px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);overflow:hidden;">
+                    <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);padding:24px;text-align:center;">
+                        <div style="background:rgba(255,255,255,0.2);width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px auto;">
+                            <svg width="32" height="32" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        </div>
+                        <h3 style="margin:0;font-size:20px;font-weight:800;color:white;">Feature Locked</h3>
+                    </div>
+                    <div class="modal-body" style="padding:24px;text-align:center;">
+                        <p style="font-size:15px;color:#475569;margin:0;line-height:1.5;">
+                            Your CUREBIT subscription has expired. This action is disabled.
+                        </p>
+                        <p style="font-size:14px;color:#64748b;margin-top:12px;margin-bottom:0;">
+                            Please renew your subscription to restore full access to all features, including adding patients, generating reports, and printing.
+                        </p>
+                    </div>
+                    <div class="modal-footer" style="display:flex;gap:12px;padding:20px 24px;background:#f8fafc;border-top:1px solid #e2e8f0;">
+                        <button class="btn btn-outline" style="flex:1;" onclick="document.getElementById('subscriptionLockedModal').remove()">Close</button>
+                        <button class="btn btn-primary" style="flex:1;background:#dc2626;border-color:#dc2626;" onclick="document.getElementById('subscriptionLockedModal').remove(); showPage('subscription');">
+                            View Plans
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    },
+    
+    run(callback) {
+        if (this.isActive()) {
+            if (typeof callback === 'function') callback();
+            return true;
+        } else {
+            this.showLockedModal();
+            return false;
+        }
+    }
+};

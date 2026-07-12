@@ -1,21 +1,26 @@
-﻿{
-    "name": "CUREBIT - Blood Lab Test Report Software",
+{
+    "name": "CUREBIT - Enterprise Pathology Laboratory Software",
     "short_name": "CUREBIT",
     "description": "Professional blood lab test report software for pathology labs. Generate reports with 200+ test templates.",
     "start_url": "/index.html",
     "display": "standalone",
     "background_color": "#0f172a",
-    "theme_color": "#4f46e5",
+    "theme_color": "#0F766E",
     "orientation": "portrait-primary",
     "scope": "/",
-    "lang": "en-IN",
+    "lang": "en",
     "categories": ["medical", "health", "business", "productivity"],
     "icons": [
         {
-            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect rx='38' width='192' height='192' fill='%234f46e5'/><text x='96' y='128' text-anchor='middle' fill='white' font-size='100' font-family='Arial' font-weight='bold'>L</text></svg>",
-            "sizes": "192x192",
+            "src": "favicon.svg",
+            "sizes": "any",
             "type": "image/svg+xml",
             "purpose": "any maskable"
+        },
+        {
+            "src": "black.png",
+            "sizes": "192x192 512x512",
+            "type": "image/png"
         }
     ],
     "screenshots": [],

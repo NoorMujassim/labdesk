@@ -51,22 +51,22 @@ async function renderReports() {
                             onmouseover="this.style.borderColor='#334155';this.style.color='#0f172a';" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b';">
                             ${ICONS.view}
                         </button>
-                        <button onclick="shareOnWhatsApp('${r.id}')" title="WhatsApp"
+                        <button onclick="SubscriptionGuard.run(() => shareOnWhatsApp('${r.id}'))" title="WhatsApp"
                             style="width:30px;height:30px;border-radius:7px;border:1.5px solid #bbf7d0;background:#f0fdf4;color:#16a34a;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;"
                             onmouseover="this.style.background='#dcfce7';" onmouseout="this.style.background='#f0fdf4';">
                             ${ICONS.whatsapp}
                         </button>
-                        <button onclick="handlePrintReport('${r.id}')" title="Print PDF"
+                        <button onclick="SubscriptionGuard.run(() => handlePrintReport('${r.id}'))" title="Print PDF"
                             style="width:30px;height:30px;border-radius:7px;border:1.5px solid #e2e8f0;background:white;color:#64748b;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;"
                             onmouseover="this.style.borderColor='#334155';this.style.color='#0f172a';" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b';">
                             ${ICONS.print}
                         </button>
-                        <button onclick="editReport('${r.id}')" title="Edit"
+                        <button onclick="SubscriptionGuard.run(() => editReport('${r.id}'))" title="Edit"
                             style="width:30px;height:30px;border-radius:7px;border:1.5px solid #e2e8f0;background:white;color:#64748b;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;"
                             onmouseover="this.style.borderColor='#334155';this.style.color='#0f172a';" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b';">
                             ${ICONS.edit}
                         </button>
-                        <button onclick="deleteReport('${r.id}')" title="Delete"
+                        <button onclick="SubscriptionGuard.run(() => deleteReport('${r.id}'))" title="Delete"
                             style="width:30px;height:30px;border-radius:7px;border:1.5px solid #fecaca;background:#fff5f5;color:#ef4444;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;"
                             onmouseover="this.style.background='#fee2e2';" onmouseout="this.style.background='#fff5f5';">
                             ${ICONS.delete}
@@ -83,7 +83,7 @@ async function renderReports() {
                 </div>
                 <p style="font-size:14px;font-weight:700;color:#334155;">No reports found</p>
                 <p style="font-size:12px;color:#94a3b8;margin:6px 0 18px;">Create your first diagnostic report.</p>
-                <button onclick="showPage('newReport')" class="btn btn-primary" style="padding:10px 20px;font-size:13px;border-radius:10px;">
+                <button onclick="SubscriptionGuard.run(() => showPage('newReport'))" class="btn btn-primary" style="padding:10px 20px;font-size:13px;border-radius:10px;">
                     ${plusSvg} Create Report
                 </button>
             </div>`;
@@ -171,7 +171,7 @@ async function editReport(id) {
                     </p>
                     <div style="display:flex;gap:10px;">
                         <button onclick="closeModal()" class="btn btn-outline" style="flex:1;">Cancel</button>
-                        <button onclick="closeModal();handleCreateRevision('${id}')" class="btn btn-primary" style="flex:1;">Create Revision 2.0</button>
+                        <button onclick="closeModal();SubscriptionGuard.run(() => handleCreateRevision('${id}'))" class="btn btn-primary" style="flex:1;">Create Revision 2.0</button>
                     </div>
                 </div>
             </div>
@@ -307,23 +307,23 @@ async function viewReport(id) {
                     </div>
                     <div style="display:flex;align-items:center;gap:6px;">
                         ${!report.isLocked ? `
-                            <button onclick="handleLockReport('${report.id}')" title="Verify & Finalize Report"
+                            <button onclick="SubscriptionGuard.run(() => handleLockReport('${report.id}'))" title="Verify & Finalize Report"
                                 style="padding:0 12px;height:32px;border-radius:8px;border:none;background:#0F766E;color:white;font-size:12px;font-weight:800;display:inline-flex;align-items:center;gap:4px;cursor:pointer;box-shadow:0 2px 6px rgba(15,118,110,0.3);">
                                 🔒 Verify & Finalize
                             </button>
                         ` : `
-                            <button onclick="handleCreateRevision('${report.id}')" title="Create Revision 2.0"
+                            <button onclick="SubscriptionGuard.run(() => handleCreateRevision('${report.id}'))" title="Create Revision 2.0"
                                 style="padding:0 12px;height:32px;border-radius:8px;border:1px solid #cbd5e1;background:#f8fafc;color:#334155;font-size:11.5px;font-weight:700;display:inline-flex;align-items:center;gap:4px;cursor:pointer;">
                                 🔄 Create Revision
                             </button>
                         `}
-                        <button onclick="closeModal();handlePrintReport('${report.id}')" title="Print Report"
+                        <button onclick="closeModal();SubscriptionGuard.run(() => handlePrintReport('${report.id}'))" title="Print Report"
                             style="width:32px;height:32px;border-radius:8px;border:none;background:#0f172a;color:white;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;"
                             onmouseover="this.style.background='#1e293b';" onmouseout="this.style.background='#0f172a';">
                             ${ICONS.print}
                         </button>
                         
-                        <button onclick="handlePrintReceipt('${report.id}')" title="Print Receipt"
+                        <button onclick="SubscriptionGuard.run(() => handlePrintReceipt('${report.id}'))" title="Print Receipt"
                             style="width:32px;height:32px;border-radius:8px;border:1.5px solid #e2e8f0;background:white;color:#334155;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;"
                             onmouseover="this.style.borderColor='#cbd5e1';this.style.background='#f8fafc';" onmouseout="this.style.borderColor='#e2e8f0';this.style.background='white';">
                             ${ICONS.history}
@@ -332,7 +332,7 @@ async function viewReport(id) {
                         ${(() => {
                             const isPhoneValid = isValidPhone(patient?.phone);
                             return `
-                            <button onclick="${isPhoneValid ? `shareOnWhatsApp('${report.id}')` : `showToast('Patient phone number is missing or invalid','error')`}" 
+                            <button onclick="${isPhoneValid ? `SubscriptionGuard.run(() => shareOnWhatsApp('${report.id}'))` : `showToast('Patient phone number is missing or invalid','error')`}" 
                                 title="Share on WhatsApp"
                                 style="width:32px;height:32px;border-radius:8px;border:none;background:${isPhoneValid ? '#25D366' : '#cbd5e1'};color:white;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;opacity:${isPhoneValid ? '1' : '0.6'};transition:transform 0.15s;"
                                 onmouseover="if(${isPhoneValid})this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
@@ -340,7 +340,7 @@ async function viewReport(id) {
                             </button>`;
                         })()}
 
-                        <button onclick="copyReportLink('${report.id}')" title="Copy Report Link"
+                        <button onclick="SubscriptionGuard.run(() => copyReportLink('${report.id}'))" title="Copy Report Link"
                             style="width:32px;height:32px;border-radius:8px;border:1.5px solid #e2e8f0;background:white;color:#64748b;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;"
                             onmouseover="this.style.borderColor='#cbd5e1';this.style.background='#f8fafc';" onmouseout="this.style.borderColor='#e2e8f0';this.style.background='white';">
                             ${ICONS.copy}
@@ -368,7 +368,7 @@ async function viewReport(id) {
 
                 <!-- MODAL FOOTER -->
                 <div class="p-4 bg-white border-top text-center">
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">CUREBIT Terminal • Secure Patient Report Access</p>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">${(lab.labName || 'Registered Lab').toUpperCase()} • Secure Patient Report Access</p>
                 </div>
             </div>
     `;

@@ -15,6 +15,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="apple-touch-icon" href="/favicon.svg">
+    <link rel="manifest" href="/manifest.json">
 
     <!-- SEO Meta Tags -->
     <title>CUREBIT - Enterprise Pathology Laboratory Software & LIS System</title>
@@ -22,7 +23,7 @@
         content="CUREBIT is a hospital-grade, cloud-based pathology lab management software (LIS). Generate A4/A5 PDF blood test reports with 200+ templates, patient records, and WhatsApp delivery.">
     <meta name="theme-color" content="#0F766E">
     <meta name="google-site-verification" content="AAOtX7Gb52t_JcBGa4VT00wQ7apnSBkSbMa4PGz3W0E" />
-    <link rel="canonical" href="https://CUREBIT.pages.dev/">
+    <link rel="canonical" href="https://curebit.umbrellainfo.space/">
     <meta name="keywords"
         content="lab software, pathology lab software, LIS software, blood test report, medical lab management, clinical lab software, diagnostic center software, lab report software, medical laboratory, test report generator">
     <meta name="author" content="CUREBIT">
@@ -30,20 +31,20 @@
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://CUREBIT.pages.dev/">
+    <meta property="og:url" content="https://curebit.umbrellainfo.space/">
     <meta property="og:title" content="CUREBIT - Enterprise Pathology Laboratory Software">
     <meta property="og:description"
         content="Hospital-grade cloud-based pathology laboratory information system (LIS). Generate professional blood test reports with 200+ templates and instant WhatsApp delivery.">
-    <meta property="og:image" content="https://CUREBIT.pages.dev/black.png">
+    <meta property="og:image" content="https://curebit.umbrellainfo.space/black.png">
     <meta property="og:site_name" content="CUREBIT">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://CUREBIT.pages.dev/">
+    <meta property="twitter:url" content="https://curebit.umbrellainfo.space/">
     <meta property="twitter:title" content="CUREBIT - Enterprise Pathology Laboratory Software">
     <meta property="twitter:description"
         content="Hospital-grade cloud-based pathology laboratory information system (LIS) with 200+ templates.">
-    <meta property="twitter:image" content="https://CUREBIT.pages.dev/black.png">
+    <meta property="twitter:image" content="https://curebit.umbrellainfo.space/black.png">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -52,30 +53,76 @@
 
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "CUREBIT",
-        "applicationCategory": "HealthApplication",
-        "operatingSystem": "Web Browser",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "INR",
-            "availability": "https://schema.org/InStock"
+    [
+        {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "CUREBIT",
+            "url": "https://curebit.umbrellainfo.space"
         },
-        "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.9",
-            "ratingCount": "342"
-        },
-        "description": "Hospital-grade, cloud-based pathology lab management software for generating blood test reports with 200+ templates.",
-        "url": "https://CUREBIT.pages.dev",
-        "author": {
+        {
+            "@context": "https://schema.org",
             "@type": "Organization",
-            "name": "CUREBIT"
+            "name": "CUREBIT",
+            "url": "https://curebit.umbrellainfo.space",
+            "logo": "https://curebit.umbrellainfo.space/black.png",
+            "description": "Enterprise Pathology Laboratory Software"
+        },
+        {
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": "CUREBIT",
+            "applicationCategory": "HealthApplication",
+            "operatingSystem": "Web Browser",
+            "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "INR",
+                "availability": "https://schema.org/InStock"
+            },
+            "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "4.9",
+                "ratingCount": "342"
+            },
+            "description": "Hospital-grade, cloud-based pathology lab management software for generating blood test reports with 200+ templates.",
+            "url": "https://curebit.umbrellainfo.space",
+            "author": {
+                "@type": "Organization",
+                "name": "CUREBIT"
+            }
+        },
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {
+                    "@type": "Question",
+                    "name": "Is my laboratory data secure?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Yes, we use bank-level encryption, regular backups, and role-based access control. Your data is stored securely on cloud infrastructure with 99.9% uptime."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Can I customize the report formats?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Absolutely. You can add your lab logo, adjust margins, and customize reference ranges for all 200+ test templates to match your brand identity."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Do I need to install any software on my computer?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "No installation is required. CUREBIT is a 100% cloud-based web application. You can access it securely from any device with a modern web browser."
+                    }
+                }
+            ]
         }
-    }
+    ]
     </script>
 
     <style>
@@ -759,7 +806,7 @@
     <!-- ░░░░░░░░░ 1. NAVBAR ░░░░░░░░░ -->
     <nav class="navbar" id="navbar">
         <div class="container nav-container">
-            <a href="#" class="logo" style="display:flex;align-items:center;">
+            <a href="#" class="logo" style="display:flex;align-items:center;" aria-label="CureBIT Home">
                 <img src="black.png" alt="CureBIT Logo" style="height:38px;width:auto;object-fit:contain;display:block;">
             </a>
             <div class="nav-links">
@@ -774,6 +821,7 @@
             </div>
         </div>
     </nav>
+    <main id="main-content">
 
     <!-- ░░░░░░░░░ 2. HERO SECTION ░░░░░░░░░ -->
     <section class="hero">
@@ -1192,7 +1240,7 @@
             </div>
 
             <div class="faq-item active">
-                <div class="faq-question" onclick="toggleFaq(this)">
+                <div class="faq-question" role="button" tabindex="0" onclick="toggleFaq(this)">
                     How does the 7-day free trial work?
                     <span class="faq-chevron">▼</span>
                 </div>
@@ -1202,7 +1250,7 @@
             </div>
 
             <div class="faq-item">
-                <div class="faq-question" onclick="toggleFaq(this)">
+                <div class="faq-question" role="button" tabindex="0" onclick="toggleFaq(this)">
                     Do I need special printers or hardware?
                     <span class="faq-chevron">▼</span>
                 </div>
@@ -1212,7 +1260,7 @@
             </div>
 
             <div class="faq-item">
-                <div class="faq-question" onclick="toggleFaq(this)">
+                <div class="faq-question" role="button" tabindex="0" onclick="toggleFaq(this)">
                     Is my patient data secure?
                     <span class="faq-chevron">▼</span>
                 </div>
@@ -1222,7 +1270,7 @@
             </div>
 
             <div class="faq-item">
-                <div class="faq-question" onclick="toggleFaq(this)">
+                <div class="faq-question" role="button" tabindex="0" onclick="toggleFaq(this)">
                     Can I add my lab's logo and letterhead header?
                     <span class="faq-chevron">▼</span>
                 </div>
@@ -1246,12 +1294,14 @@
     </section>
 
     <!-- ░░░░░░░░░ 12. FOOTER ░░░░░░░░░ -->
+    </main>
+
     <footer class="footer">
         <div class="container">
             <div class="footer-grid">
                 <div>
                     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-                        <img src="white.png" alt="CureBIT Logo" style="height:42px;width:auto;object-fit:contain;display:block;">
+                        <img src="white.png" alt="CureBIT Logo" loading="lazy" style="height:42px;width:auto;object-fit:contain;display:block;">
                     </div>
                     <p style="line-height:1.7;">Hospital-grade cloud-based pathology laboratory information system (LIS). Generate professional blood test reports with 200+ pre-calculated templates.</p>
                 </div>
@@ -1289,7 +1339,7 @@
 
             <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:24px;text-align:center;font-size:13px;color:#64748B;">
                 &copy; 2026 CUREBIT Laboratory Information System. All rights reserved. <br>
-                <a href="https://www.umbrellainfo.space" target="_blank" style="color:#94A3B8;text-decoration:none;">
+                <a href="https://www.umbrellainfo.space" target="_blank" style="color:#94A3B8;text-decoration:none;" aria-label="Visit UmbrellaInFo website">
                     Designed & Engineered by UmbrellaInFo
                 </a>
             </div>

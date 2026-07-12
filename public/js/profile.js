@@ -35,7 +35,9 @@ async function getProfileData() {
             lastLogin: user?.metadata?.lastSignInTime || '',
             provider: user?.providerData?.[0]?.providerId || 'email',
             emailVerified: user?.emailVerified || false,
-            labName: data.labName || '',
+            labName: DB.normalizeLabName
+                ? DB.normalizeLabName(data.labName, data.ownerName || user?.displayName || '')
+                : (data.labName || user?.displayName || ''),
 
             // Lab Staff
             techName: data.techName || data.drName || '',
