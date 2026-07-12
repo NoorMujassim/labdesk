@@ -357,7 +357,7 @@ async function handlePayment(planId) {
             currency: "INR",
             name: "CUREBIT",
             description: `${plan.name} (${billingCycle === 'one_time' ? 'One Time' : (billingCycle === 'yearly' ? 'Yearly' : 'Monthly')})`,
-            image: "https://CUREBIT.pages.dev/apple-touch-icon.png",
+            image: "https://curebit.umbrellainfo.space/black.png",
             order_id: resolvedOrderId,
             handler: async function (response) {
                 console.log('Razorpay Response:', response);

@@ -6,8 +6,6 @@ Allow: /
 Disallow: /app.html
 Disallow: /api/
 Disallow: /admin/
-Disallow: /js/
-Disallow: /css/
 
 # Sitemap location
 Sitemap: https://curebit.umbrellainfo.space/sitemap.xml
@@ -23,6 +21,4 @@ Allow: /
 Crawl-delay: 2
 
 # Yandex
-User-agent: Yandex
-Allow: /
-Crawl-delay: 3
+
